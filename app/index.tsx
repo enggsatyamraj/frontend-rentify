@@ -4,7 +4,7 @@ import React from 'react'
 export default function index() {
     return (
         <View>
-            <Text>index</Text>
+            <Text className='text-2xl font-bold bg-red-800'>Nativewind</Text>
         </View>
     )
 }

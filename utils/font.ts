@@ -8,17 +8,17 @@ const SCALE = SCREEN_WIDTH > SCREEN_HEIGHT ? SCREEN_HEIGHT : SCREEN_WIDTH;
 // Base width for scaling calculations
 const BASE_WIDTH = 375;
 
-// Configuration object for fine-tuning text sizes
+// Modified configuration with reduced scaling for larger screens
 const fontConfig = {
     phone: {
-        small: { min: 0.8, max: 1 },
-        medium: { min: 0.9, max: 1.1 },
-        large: { min: 1, max: 1.2 },
+        small: { min: 0.8, max: 0.9 },    // Slightly reduced max
+        medium: { min: 0.85, max: 1.0 },  // Reduced max
+        large: { min: 0.9, max: 1.1 },    // Reduced max
     },
     tablet: {
-        small: { min: 1.3, max: 1.4 },
-        medium: { min: 1.4, max: 1.5 },
-        large: { min: 1.5, max: 1.7 },
+        small: { min: 1.0, max: 1.1 },    // Significantly reduced
+        medium: { min: 1.1, max: 1.2 },   // Significantly reduced
+        large: { min: 1.2, max: 1.3 },    // Significantly reduced
     },
 };
 
@@ -58,9 +58,9 @@ export const getFontSize = (size: number): number => {
     // Calculate the new size
     let newSize = size * clampedScaleFactor;
 
-    // Additional scaling for tablets to ensure text isn't too small
+    // Reduced tablet scaling
     if (deviceType === 'tablet') {
-        newSize *= 1.1; // Increase tablet font sizes by an additional 10%
+        newSize *= 1.05; // Reduced from 1.1 to 1.05 (only 5% increase for tablets)
     }
 
     // Round the size and adjust for the device's font scale
@@ -80,7 +80,3 @@ export const adjustFontConfig = (
 // Example usage
 console.log('Device type:', getDeviceType());
 console.log('Font size for 16:', getFontSize(16));
-
-// Example of adjusting font configuration
-adjustFontConfig('phone', 'medium', 0.95, 1.15);
-console.log('Adjusted font size for 16:', getFontSize(16));

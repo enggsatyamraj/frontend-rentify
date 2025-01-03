@@ -61,7 +61,7 @@ export const colors: ThemeColors = {
     primary: {
         main: '#4A60A1',     // Main brand color - used for primary buttons and CTAs
         light: '#6B7CB4',    // Lighter variant - used for hover states
-        dark: '#364877',     // Darker variant - used for pressed states
+        dark: '#003566',     // Darker variant - used for pressed states
         contrastText: '#FFFFFF'
     },
     secondary: {

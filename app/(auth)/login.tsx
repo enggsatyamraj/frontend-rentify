@@ -33,7 +33,7 @@ export default function login() {
                         <View
                             className=" rounded-tr-[20px] rounded-tl-[20px] items-center flex-1">
                             <Text
-                                className="text-center text-gray-200 mb-8 mt-9 font-semibold"
+                                className="text-center text-white mb-8 font-semibold"
                                 style={{ fontSize: getFontSize(22) }}
                             >
                                 Discover houses {"\n"} near you
@@ -53,10 +53,10 @@ export default function login() {
                             </View>
                             <View className="bg-gray-200 w-full px-4 py-10 rounded-[20px] max-w-[800px]">
                                 <Text style={{ fontSize: getFontSize(16) }} className="mb-5">
-                                    LOGIN
+                                    Enter phone number to continue
                                 </Text>
                                 <InputWithLabel
-                                    label="Phone Number"
+                                    // label="Enter Phone Number"
                                     value={phoneNumber}
                                     onChangeText={(text) => { setPhoneNumber(text) }}
                                     placeholder="Enter your phone number"
@@ -71,7 +71,7 @@ export default function login() {
                                         paddingVertical: 10,
                                     }}
                                 >
-                                    <Text className="text-center text-gray-200" style={{ fontSize: getFontSize(15) }}>continue</Text>
+                                    <Text className="text-center text-white" style={{ fontSize: getFontSize(15) }}>continue</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>

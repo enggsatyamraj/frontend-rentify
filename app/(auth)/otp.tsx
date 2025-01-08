@@ -45,14 +45,14 @@ export default function OtpVerification() {
     };
 
     const handleResendOTP = () => {
-        if (canResend) {
-            // Add your resend OTP logic here
-            console.log('Resending OTP to:', phoneNumber);
+        // if (canResend) {
+        // Add your resend OTP logic here
+        console.log('Resending OTP to:', phoneNumber);
 
-            // Reset timer and canResend state
-            setTimer(45);
-            setCanResend(false);
-        }
+        // Reset timer and canResend state
+        // setTimer(45);
+        // setCanResend(false);
+        // }
     };
 
     const formatTime = (seconds: number) => {
@@ -74,7 +74,7 @@ export default function OtpVerification() {
                     >
                         <View className="rounded-tr-[20px] rounded-tl-[20px] items-center flex-1">
                             {/* <Text
-                                className="text-center text-gray-200 mb-8 font-semibold"
+                                className="text-center text-white mb-8 font-semibold"
                                 style={{ fontSize: getFontSize(20) }}
                             >
                                 Verify Your {"\n"} Phone Number
@@ -107,7 +107,7 @@ export default function OtpVerification() {
                                     }}
                                 >
                                     <Text
-                                        className="text-center text-gray-200"
+                                        className="text-center text-white"
                                         style={{ fontSize: getFontSize(15) }}
                                     >
                                         Verify

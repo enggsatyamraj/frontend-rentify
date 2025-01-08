@@ -9,6 +9,7 @@ import {
     StyleSheet,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { getFontSize } from "@/utils/font";
 
 interface InputWithLabelProps extends TextInputProps {
     label?: string;
@@ -37,7 +38,7 @@ const InputWithLabel: React.FC<InputWithLabelProps> = ({
             {/* Label and Description Container */}
             <View className="space-y-1">
                 {label && (
-                    <Text className="text-sm font-medium text-gray-900 dark:text-gray-50">
+                    <Text style={{ fontSize: getFontSize(13) }} className="mb-2 font-medium text-gray-900">
                         {label}
                     </Text>
                 )}
@@ -49,15 +50,7 @@ const InputWithLabel: React.FC<InputWithLabelProps> = ({
             </View>
 
             {/* Input Container */}
-            <View
-                className={`
-                    relative flex-row items-center border rounded-md bg-transparent
-                    ${isFocused
-                        ? "border-gray-900 dark:border-gray-50"
-                        : "border-gray-200 dark:border-gray-800"}
-                    ${error ? "border-red-500 dark:border-red-900" : ""}
-                `}
-            >
+            <View className="relative flex-row items-center">
                 <TextInput
                     value={value}
                     onChangeText={onChangeText}
@@ -67,10 +60,13 @@ const InputWithLabel: React.FC<InputWithLabelProps> = ({
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     className={`
-                        flex-1 h-10 px-3 py-2 text-base
-                        text-gray-900 dark:text-gray-50
-                        bg-transparent
+                        flex-1 h-10 px-3 py-2
+                        text-gray-900
+                        bg-transparent border-[1px] 
+                        ${isFocused ? 'border-gray-900' : 'border-gray-700'}
+                        rounded-lg
                     `}
+                    style={{ fontSize: getFontSize(14) }}
                     {...rest}
                 />
 
@@ -78,7 +74,7 @@ const InputWithLabel: React.FC<InputWithLabelProps> = ({
                 {showToggle && secureTextEntry && (
                     <Pressable
                         onPress={() => setIsSecure(!isSecure)}
-                        className="pr-3 pl-2"
+                        className="absolute right-3"
                         hitSlop={8}
                     >
                         <Feather
@@ -92,7 +88,7 @@ const InputWithLabel: React.FC<InputWithLabelProps> = ({
 
             {/* Error Message */}
             {error && (
-                <Text className="text-sm font-medium text-red-500 dark:text-red-900">
+                <Text className="text-sm font-medium text-red-500">
                     {error}
                 </Text>
             )}

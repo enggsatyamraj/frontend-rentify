@@ -1,120 +1,83 @@
 import {
     View,
     Text,
-    ScrollView,
     Image,
-    TouchableOpacity,
     KeyboardAvoidingView,
     Platform,
+    TouchableOpacity,
 } from "react-native";
 import React, { useState } from "react";
 import colors from "@/utils/color";
-import { getFontSize } from "@/utils/font";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Wrapper from "@/components/Wrapper";
+import { getFontSize } from "@/utils/font";
 import InputWithLabel from "@/components/InputWithLabel";
+import { useRouter } from "expo-router";
 
-export default function Login() {
-    const [email, setEmail] = useState<string>("");
-    const [password, setPassword] = useState<string>("");
+export default function login() {
+    const [phoneNumber, setPhoneNumber] = useState("");
+    const router = useRouter();
+
+    const handleContinue = () => {
+        router.push({ pathname: "/(auth)/otp", params: { phoneNumber } });
+    }
 
     return (
-        <SafeAreaView
-            style={{ backgroundColor: colors.primary.dark }}
-            className="flex-1"
-            edges={["top"]}
-        >
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                className="flex-1"
-            >
-                <ScrollView
-                    showsVerticalScrollIndicator={false}
-                    style={{ backgroundColor: colors.primary.dark }}
-                    contentContainerStyle={{
-                        flexGrow: 1,
-                        justifyContent: "space-between",
-                    }}
-                    className="w-full"
-                >
-                    {/* Top Section */}
-                    <View className="items-center pt-10 px-6">
-                        <Text
-                            style={{ fontSize: getFontSize(28), lineHeight: getFontSize(34) }}
-                            className="text-center text-gray-200 font-bold mb-4"
-                        >
-                            Discover houses{"\n"}near you
-                        </Text>
-
-                        <Text
-                            style={{ fontSize: getFontSize(16), lineHeight: getFontSize(22) }}
-                            className="text-center text-gray-300 mb-8"
-                        >
-                            Explore thousands of Flats, PG, commercials{"\n"}on rent based on
-                            your preferred location
-                        </Text>
-
-                        <Image
-                            source={require("../../assets/images/splash_screen_house.png")}
-                            className="w-[60%]"
-                            resizeMode="contain"
-                        />
-                    </View>
-
-                    {/* Login Form Section */}
-                    <View className="bg-white rounded-t-[30px] px-6 pt-8 pb-6 shadow-lg">
-                        <Text
-                            style={{ fontSize: getFontSize(24), lineHeight: getFontSize(28) }}
-                            className="font-bold text-gray-900 mb-6"
-                        >
-                            LOGIN
-                        </Text>
-
-                        <View className="space-y-4">
-                            {/* Email Input */}
-                            <InputWithLabel
-                                label="Email"
-                                value={email}
-                                onChangeText={setEmail}
-                                placeholder="Enter your email"
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                            />
-
-                            {/* Password Input */}
-                            <InputWithLabel
-                                label="Password"
-                                value={password}
-                                onChangeText={setPassword}
-                                placeholder="Enter your password"
-                                secureTextEntry
-                            />
-
-                            {/* Forgot Password Link */}
-                            <TouchableOpacity className="self-end">
-                                <Text
-                                    style={{ fontSize: getFontSize(12) }}
-                                    className="text-gray-500"
-                                >
-                                    Forgot Password?
-                                </Text>
-                            </TouchableOpacity>
-
-                            {/* Login Button */}
-                            <TouchableOpacity
-                                className="bg-[#1a365d] rounded-lg py-4 mt-4 shadow-md"
-                                style={{ backgroundColor: colors.primary.dark }}
+        <View style={{ backgroundColor: colors.primary.dark }} className="flex-1">
+            <SafeAreaView className="flex-1">
+                <Wrapper>
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === "ios" ? "padding" : "height"}
+                        style={{ flex: 1 }}
+                    >
+                        <View
+                            className=" rounded-tr-[20px] rounded-tl-[20px] items-center flex-1">
+                            <Text
+                                className="text-center text-gray-200 mb-8 mt-9 font-semibold"
+                                style={{ fontSize: getFontSize(22) }}
                             >
-                                <Text
-                                    className="text-white text-center font-semibold"
-                                    style={{ fontSize: getFontSize(16), lineHeight: getFontSize(20) }}
-                                >
+                                Discover houses {"\n"} near you
+                            </Text>
+                            <Text
+                                className="text-center text-gray-300"
+                                style={{ fontSize: getFontSize(15) }}
+                            >
+                                Explore thousands of Flats, PG, commercials {"\n"} on rent based
+                                on your preferred location
+                            </Text>
+                            <View className="flex-1 items-center justify-center">
+                                <Image
+                                    source={require("@/assets/images/splash_screen_house.png")}
+                                // style={{ width: '100%' }}
+                                />
+                            </View>
+                            <View className="bg-gray-200 w-full px-4 py-10 rounded-[20px] max-w-[800px]">
+                                <Text style={{ fontSize: getFontSize(16) }} className="mb-5">
                                     LOGIN
                                 </Text>
-                            </TouchableOpacity>
+                                <InputWithLabel
+                                    label="Phone Number"
+                                    value={phoneNumber}
+                                    onChangeText={(text) => { setPhoneNumber(text) }}
+                                    placeholder="Enter your phone number"
+                                    keyboardType="numeric"
+                                    maxLength={10}
+                                />
+                                <TouchableOpacity
+                                    onPress={handleContinue}
+                                    style={{
+                                        backgroundColor: colors.primary.dark,
+                                        borderRadius: 20,
+                                        paddingVertical: 10,
+                                    }}
+                                >
+                                    <Text className="text-center text-gray-200" style={{ fontSize: getFontSize(15) }}>continue</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
-        </SafeAreaView>
+                    </KeyboardAvoidingView>
+                </Wrapper>
+            </SafeAreaView>
+        </View>
     );
 }

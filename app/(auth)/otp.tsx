@@ -5,21 +5,26 @@ import {
     KeyboardAvoidingView,
     Platform,
     TouchableOpacity,
+    ScrollView,
+    Dimensions,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import colors from "@/utils/color";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Wrapper from "@/components/Wrapper";
-import { getFontSize } from "@/utils/font";
-import OTPInput from "@/components/OtpInput"
+import { getFontSize, getDeviceType } from "@/utils/font";
+import OTPInput from "@/components/OtpInput";
 import { router, useLocalSearchParams } from "expo-router";
-import AntDesign from '@expo/vector-icons/AntDesign';
+import { AntDesign } from '@expo/vector-icons';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function OtpVerification() {
     const [otp, setOtp] = useState("");
     const [timer, setTimer] = useState(45);
     const [canResend, setCanResend] = useState(false);
     const { phoneNumber } = useLocalSearchParams();
+    const isTablet = getDeviceType() === 'tablet';
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -40,107 +45,158 @@ export default function OtpVerification() {
     }, [timer]);
 
     const handleVerify = () => {
-        // Handle OTP verification here
-        console.log('OTP:', otp);
+        if (otp.length === 6) {
+            // Handle OTP verification here
+            console.log('OTP:', otp);
+        }
     };
 
     const handleResendOTP = () => {
-        // if (canResend) {
-        // Add your resend OTP logic here
-        console.log('Resending OTP to:', phoneNumber);
-
-        // Reset timer and canResend state
-        // setTimer(45);
-        // setCanResend(false);
-        // }
+        if (canResend) {
+            // Add your resend OTP logic here
+            console.log('Resending OTP to:', phoneNumber);
+            setTimer(45);
+            setCanResend(false);
+            // Implement your resend logic here
+        }
     };
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
-        return `${secs}s`;
+        return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${secs}s`;
     };
 
     return (
-        <View style={{ backgroundColor: colors.primary.dark }} className="flex-1">
-            <SafeAreaView className="flex-1">
-                <Wrapper>
-                    <TouchableOpacity onPress={() => { router.back() }} className="mb-5">
-                        <AntDesign name="arrowleft" size={24} color={"#e5e7eb"} />
-                    </TouchableOpacity>
-                    <KeyboardAvoidingView
-                        behavior={Platform.OS === "ios" ? "padding" : "height"}
-                        style={{ flex: 1 }}
-                    >
-                        <View className="rounded-tr-[20px] rounded-tl-[20px] items-center flex-1">
-                            {/* <Text
-                                className="text-center text-white mb-8 font-semibold"
-                                style={{ fontSize: getFontSize(20) }}
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.primary.dark }}>
+            <ScrollView
+                contentContainerStyle={{ flexGrow: 1 }}
+                keyboardShouldPersistTaps="handled"
+            >
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    style={{ flex: 1 }}
+                >
+                    <Wrapper>
+                        <View className="flex-1">
+                            {/* Back Button */}
+                            <TouchableOpacity
+                                onPress={() => router.back()}
+                                className="mb-8 p-2"
+                                style={{
+                                    width: 40,
+                                    height: 40,
+                                    borderRadius: 20,
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
+                                }}
                             >
-                                Verify Your {"\n"} Phone Number
-                            </Text>
-                            <Text
-                                className="text-center text-gray-300 mb-8"
-                                style={{ fontSize: getFontSize(15) }}
-                            >
-                                Please enter the 6-digit code sent to{"\n"}
-                                {phoneNumber}
-                            </Text> */}
-                            <View className="bg-gray-200 w-full px-4 py-10 rounded-[20px] max-w-[500px]">
-                                <Text style={{ fontSize: getFontSize(16) }} className="mb-5">
-                                    ENTER OTP
+                                <AntDesign name="arrowleft" size={isTablet ? 28 : 24} color="#FFFFFF" />
+                            </TouchableOpacity>
+
+                            {/* Header Section */}
+                            <View className="items-start mb-12">
+                                <Text
+                                    className="text-white font-bold mb-4 w-full"
+                                    style={{
+                                        textAlign: 'center',
+                                        fontSize: getFontSize(isTablet ? 32 : 24),
+                                        lineHeight: getFontSize(isTablet ? 40 : 32)
+                                    }}
+                                >
+                                    Verify Your{"\n"}Phone Number
                                 </Text>
-                                <View className="mb-6">
+                                <Text
+                                    className="text-gray-300 w-full text-center"
+                                    style={{
+                                        fontSize: getFontSize(isTablet ? 18 : 16),
+                                        lineHeight: getFontSize(isTablet ? 28 : 24)
+                                    }}
+                                >
+                                    Please enter the 6-digit code sent to{"\n"}
+                                    <Text className="font-semibold text-white">
+                                        {phoneNumber}
+                                    </Text>
+                                </Text>
+                            </View>
+
+                            {/* OTP Input Section */}
+                            <View
+                                className="bg-white rounded-[24px] p-8 shadow-lg mx-auto w-full"
+                                style={{
+                                    maxWidth: isTablet ? 550 : 450,
+                                }}
+                            >
+                                <Text
+                                    style={{
+                                        fontSize: getFontSize(isTablet ? 22 : 18),
+                                        marginBottom: isTablet ? 24 : 20
+                                    }}
+                                    className="font-semibold text-gray-800"
+                                >
+                                    Enter verification code
+                                </Text>
+
+                                <View className="mb-8">
                                     <OTPInput
                                         length={6}
                                         value={otp}
                                         onChange={setOtp}
                                     />
                                 </View>
+
                                 <TouchableOpacity
                                     onPress={handleVerify}
-                                    disabled={timer > 0}
+                                    disabled={otp.length !== 6}
                                     style={{
-                                        backgroundColor: colors.primary.dark,
-                                        borderRadius: 20,
-                                        paddingVertical: 10,
+                                        backgroundColor: otp.length === 6 ? colors.primary.main : colors.grey[300],
+                                        borderRadius: isTablet ? 20 : 16,
+                                        paddingVertical: isTablet ? 18 : 14,
+                                        elevation: 2,
+                                        shadowColor: colors.primary.dark,
+                                        shadowOffset: { width: 0, height: 2 },
+                                        shadowOpacity: 0.2,
+                                        shadowRadius: 4,
                                     }}
+                                    activeOpacity={0.8}
                                 >
                                     <Text
-                                        className="text-center text-white"
-                                        style={{ fontSize: getFontSize(15) }}
+                                        className="text-center text-white font-semibold"
+                                        style={{ fontSize: getFontSize(isTablet ? 18 : 16) }}
                                     >
                                         Verify
                                     </Text>
                                 </TouchableOpacity>
 
-                                <View className="flex-row justify-center mt-4 items-center">
+                                <View className="flex-row justify-center mt-6 items-center">
                                     <Text
                                         className="text-gray-600"
-                                        style={{ fontSize: getFontSize(14) }}
+                                        style={{ fontSize: getFontSize(isTablet ? 16 : 14) }}
                                     >
                                         Didn't receive the code?{' '}
                                     </Text>
                                     <TouchableOpacity
                                         onPress={handleResendOTP}
                                         disabled={!canResend}
+                                        activeOpacity={0.7}
                                     >
                                         <Text
                                             style={{
-                                                fontSize: getFontSize(14),
-                                                color: canResend ? colors.primary.dark : colors.gray,
+                                                fontSize: getFontSize(isTablet ? 16 : 14),
+                                                color: canResend ? colors.primary.main : colors.grey[400],
                                             }}
                                             className="font-semibold"
                                         >
-                                            {canResend ? 'Resend' : `Wait ${formatTime(timer)}`}
+                                            {canResend ? 'Resend OTP' : `Wait ${formatTime(timer)}`}
                                         </Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
                         </View>
-                    </KeyboardAvoidingView>
-                </Wrapper>
-            </SafeAreaView>
-        </View>
+                    </Wrapper>
+                </KeyboardAvoidingView>
+            </ScrollView>
+        </SafeAreaView>
     );
 }

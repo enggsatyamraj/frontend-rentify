@@ -59,30 +59,30 @@ interface ThemeColors {
 // Color tokens for the rental app
 export const colors: ThemeColors = {
     primary: {
-        main: '#4A60A1',     // Main brand color - used for primary buttons and CTAs
-        light: '#6B7CB4',    // Lighter variant - used for hover states
-        dark: '#003566',     // Darker variant - used for pressed states
+        main: '#3B4F8C',     // Slightly darker and more professional
+        light: '#5D72B4',    // Better contrast for hover states
+        dark: '#2A3C6E',     // Richer dark variant
         contrastText: '#FFFFFF'
     },
     secondary: {
-        main: '#FF9666',     // Secondary color - used for highlighted features
-        light: '#FFB08C',    // Lighter variant
-        dark: '#E67D4D',     // Darker variant
+        main: '#FF7E47',     // More vibrant orange for better CTAs
+        light: '#FF9B70',    // Softer light variant
+        dark: '#E65D2B',     // Deeper dark variant
         contrastText: '#FFFFFF'
     },
     background: {
-        default: '#F5F5F5',  // Main background color
-        paper: '#FFFFFF',    // Card and elevated surface color
-        variant: '#F8FAFC',  // Alternative background for sections
-        card: '#FFFFFF',     // Property cards background
-        input: '#F9FAFB'     // Input field background
+        default: '#F8FAFC',  // Slightly warmer background
+        paper: '#FFFFFF',
+        variant: '#EEF2F6',  // More distinct variant
+        card: '#FFFFFF',
+        input: '#F9FAFB'
     },
     text: {
-        primary: '#1B1D1F',    // Main text color
-        secondary: '#6B7280',  // Secondary text, subtitles
-        disabled: '#9CA3AF',   // Disabled text
-        hint: '#94A3B8',       // Placeholder text
-        price: '#16A34A'       // Price text color
+        primary: '#1A2338',    // Deeper text color for better readability
+        secondary: '#5A6478',  // Warmer secondary text
+        disabled: '#9CA3AF',
+        hint: '#8896AB',       // Adjusted placeholder text
+        price: '#16A34A'
     },
     action: {
         active: '#4A60A1',     // Active state color

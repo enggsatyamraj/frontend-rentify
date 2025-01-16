@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Wrapper from "@/components/Wrapper";
 import { getFontSize, getDeviceType } from "@/utils/font";
 import OTPInput from "@/components/OtpInput";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, useRouter } from "expo-router";
 import { AntDesign } from '@expo/vector-icons';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -25,6 +25,7 @@ export default function OtpVerification() {
     const [canResend, setCanResend] = useState(false);
     const { phoneNumber } = useLocalSearchParams();
     const isTablet = getDeviceType() === 'tablet';
+    const router = useRouter();
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -48,6 +49,7 @@ export default function OtpVerification() {
         if (otp.length === 6) {
             // Handle OTP verification here
             console.log('OTP:', otp);
+            router.replace("/(home)")
         }
     };
 

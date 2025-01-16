@@ -32,6 +32,13 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Rentify to use your location.",
+          "locationWhenInUsePermission": "Allow Rentify to use your location while using the app."
+        }
       ]
     ],
     "experiments": {

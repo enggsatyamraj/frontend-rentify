@@ -16,6 +16,7 @@ import { getFontSize, getDeviceType } from "@/utils/font";
 import OTPInput from "@/components/OtpInput";
 import { router, useLocalSearchParams, useRouter } from "expo-router";
 import { AntDesign } from '@expo/vector-icons';
+import Entypo from '@expo/vector-icons/Entypo';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -84,21 +85,24 @@ export default function OtpVerification() {
                             {/* Back Button */}
                             <TouchableOpacity
                                 onPress={() => router.back()}
-                                className="mb-8 p-2"
+                                className=" p-2"
                                 style={{
                                     width: 40,
                                     height: 40,
                                     borderRadius: 20,
                                     backgroundColor: 'rgba(255, 255, 255, 0.1)',
                                     justifyContent: 'center',
-                                    alignItems: 'center'
+                                    alignItems: 'center',
+                                    position: 'absolute',
+                                    left: 10,
+                                    top: 10
                                 }}
                             >
                                 <AntDesign name="arrowleft" size={isTablet ? 28 : 24} color="#FFFFFF" />
                             </TouchableOpacity>
 
                             {/* Header Section */}
-                            <View className="items-start mb-12">
+                            <View className="items-start mb-6">
                                 <Text
                                     className="text-white font-bold mb-4 w-full"
                                     style={{
@@ -117,10 +121,16 @@ export default function OtpVerification() {
                                     }}
                                 >
                                     Please enter the 6-digit code sent to{"\n"}
-                                    <Text className="font-semibold text-white">
-                                        {phoneNumber}
-                                    </Text>
                                 </Text>
+                                <TouchableOpacity onPress={() => { router.back() }}>
+                                    <View className="flex flex-row gap-3 w-full items-center justify-center">
+                                        <Text style={{ fontSize: getFontSize(17) }} className="font-semibold text-white">
+                                            {phoneNumber}
+                                        </Text>
+                                        <Entypo name="pencil" size={20} color="white" />
+                                    </View>
+                                </TouchableOpacity>
+
                             </View>
 
                             {/* OTP Input Section */}

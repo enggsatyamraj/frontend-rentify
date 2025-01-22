@@ -9,13 +9,17 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.techfusion.rentify",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.techfusion.rentify",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -38,6 +42,13 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow Rentify to use your location.",
           "locationWhenInUsePermission": "Allow Rentify to use your location while using the app."
+        }
+      ],
+      "@react-native-firebase/app",
+      [
+        "@react-native-firebase/auth",
+        {
+          "phoneAuthEnabled": true
         }
       ]
     ],

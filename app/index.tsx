@@ -12,18 +12,68 @@ import { Link, useRouter } from "expo-router";
 import { getFontSize } from "@/utils/font";
 import { MotiView } from "moti";
 import colors from "@/utils/color";
+import { STORAGE_KEYS, useAuthStore } from "@/store/auth.store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function index() {
+export default function SplashScreen() {
     const router = useRouter();
     const height = Dimensions.get("window").height;
-    console.log(height);
     const [showSpinner, setShowSpinner] = useState(false);
     const [showView, setShowView] = useState(true);
+    const [isChecking, setIsChecking] = useState(false);
+    const { initializeAuth, checkTokenValidity } = useAuthStore();
+
+    const checkAuthAndNavigate = async () => {
+        try {
+            setIsChecking(true);
+
+            // First, wait for auth initialization
+            await initializeAuth();
+
+            // Get stored user data
+            const userDataStr = await AsyncStorage.getItem(STORAGE_KEYS.USER);
+            const token = await AsyncStorage.getItem(STORAGE_KEYS.TOKEN);
+            console.log("User Data from Storage:", userDataStr);
+            console.log("Token from Storage:", token);
+
+            if (userDataStr && token) {
+                // Check token validity only if we have both user and token
+                console.log("Checking token validity...");
+                const isValid = await checkTokenValidity();
+                console.log("Token validity:", isValid);
+                console.log("Token validity:", isValid);
+
+                if (isValid) {
+                    router.replace("/(home)");
+                    return;
+                }
+            }
+
+            // If we get here, either no user/token or invalid token
+            router.replace("/(auth)/login");
+
+        } catch (error) {
+            console.error("Auth check error:", error);
+            router.replace("/(auth)/login");
+        }
+    };
 
     useEffect(() => {
-        setTimeout(() => {
-            router.replace("/(auth)/login");
-        }, 5000);
+        let timer: NodeJS.Timeout;
+
+        const startAuthCheck = () => {
+            timer = setTimeout(() => {
+                if (!isChecking) {
+                    checkAuthAndNavigate();
+                }
+            }, 4000);
+        };
+
+        startAuthCheck();
+
+        return () => {
+            if (timer) clearTimeout(timer);
+        };
     }, []);
 
     return (
@@ -78,6 +128,12 @@ export default function index() {
                             size={height > 900 ? "large" : "small"}
                             color={colors.primary.dark}
                         />
+                        <Text
+                            className="mt-2 text-gray-600 text-center"
+                            style={{ fontSize: getFontSize(14) }}
+                        >
+                            {isChecking ? "Checking login status..." : "Loading..."}
+                        </Text>
                     </View>
                 )}
             </View>

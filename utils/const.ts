@@ -1,0 +1,1 @@
+export const BASE_URL = "https://rentify-backend-psdc.onrender.com/api/v1"

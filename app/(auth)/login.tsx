@@ -1,60 +1,100 @@
 import {
     View,
-    Text,
     Image,
     KeyboardAvoidingView,
     Platform,
-    TouchableOpacity,
-    Dimensions,
     ScrollView,
+    TouchableOpacity,
+    Text,
+    Dimensions,
+    StatusBar,
 } from "react-native";
 import React, { useState } from "react";
 import colors from "@/utils/color";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Wrapper from "@/components/Wrapper";
 import { getFontSize, getDeviceType } from "@/utils/font";
-import InputWithLabel from "@/components/InputWithLabel";
 import { useRouter } from "expo-router";
+import { Heading } from "@/components/Heading";
+import { Input } from "@/components/Input";
+import { Button } from "@/components/Button";
+import { validateForm, signinSchema, type SigninFormData } from "@/utils/validations/auth.validation";
+import { STORAGE_KEYS, useAuthStore } from "@/store/auth.store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function Login() {
-    const [phoneNumber, setPhoneNumber] = useState("");
+    const [formData, setFormData] = useState<SigninFormData>({
+        email: "",
+        password: ""
+    });
+    const [errors, setErrors] = useState<Partial<SigninFormData>>({});
+
     const router = useRouter();
     const isTablet = getDeviceType() === 'tablet';
+    const { signin, isLoading } = useAuthStore(); // Use store's loading state
 
-    // Calculate image dimensions based on screen size and device type
     const getImageDimensions = () => {
         if (isTablet) {
-            // For tablets, use a larger portion of the screen
-            const imageWidth = Math.min(SCREEN_WIDTH * 0.6, 600); // Max width of 600
             return {
-                width: imageWidth,
-                height: imageWidth * 0.75, // Maintain aspect ratio
-            };
-        } else {
-            // For phones, use previous scaling
-            const imageWidth = Math.min(SCREEN_WIDTH * 0.85, 400);
-            return {
-                width: imageWidth,
-                height: imageWidth * 0.75,
+                width: SCREEN_WIDTH * 0.45,
+                height: SCREEN_HEIGHT * 0.3,
             };
         }
+        return {
+            width: SCREEN_WIDTH * 0.85,
+            height: SCREEN_HEIGHT * 0.25,
+        };
     };
 
-    const handleContinue = () => {
-        if (phoneNumber.length < 10) {
-            // Add validation feedback here
-            return;
+    const handleLogin = async () => {
+        try {
+            // First validate the form
+            const validation = await validateForm(signinSchema, formData);
+            if (!validation.success) {
+                setErrors({ password: validation.error });
+                return;
+            }
+
+            console.log("Attempting login with:", formData.email);
+
+            // Use the store's signin method
+            const response = await signin({
+                email: formData.email.trim(),
+                password: formData.password
+            });
+
+            console.log("Login response:", response);
+
+            if (response.success) {
+                // Verify storage before navigation
+                const verifyToken = await AsyncStorage.getItem(STORAGE_KEYS.TOKEN);
+                const verifyUser = await AsyncStorage.getItem(STORAGE_KEYS.USER);
+
+                console.log("Final verification - Token exists:", !!verifyToken);
+                console.log("Final verification - User exists:", !!verifyUser);
+
+                if (verifyToken && verifyUser) {
+                    router.replace('/(home)');
+                } else {
+                    setErrors({ password: "Login successful but failed to save session" });
+                }
+            } else {
+                setErrors({ password: response.message });
+            }
+        } catch (error: any) {
+            console.error("Login error:", error);
+            setErrors({ password: error.message });
         }
-        router.push({ pathname: "/(auth)/otp", params: { phoneNumber } });
     };
 
     const imageDimensions = getImageDimensions();
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: colors.primary.dark }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.default }}>
+            <StatusBar barStyle="dark-content" backgroundColor={colors.background.default} />
             <ScrollView
+                showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ flexGrow: 1 }}
                 keyboardShouldPersistTaps="handled"
             >
@@ -62,32 +102,9 @@ export default function Login() {
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
                     style={{ flex: 1 }}
                 >
-                    <View className="flex-1 px-4 pt-8">
-                        {/* Header Text */}
-                        <View className="items-center mb-8">
-                            <Text
-                                className="text-center text-white font-bold mb-4"
-                                style={{
-                                    fontSize: getFontSize(isTablet ? 32 : 24),
-                                    lineHeight: getFontSize(isTablet ? 40 : 32)
-                                }}
-                            >
-                                Discover Houses{"\n"}Near You
-                            </Text>
-                            <Text
-                                className="text-center text-gray-200"
-                                style={{
-                                    fontSize: getFontSize(isTablet ? 18 : 16),
-                                    lineHeight: getFontSize(isTablet ? 28 : 24)
-                                }}
-                            >
-                                Explore thousands of Flats, PG, commercials{"\n"}
-                                based on your preferred location
-                            </Text>
-                        </View>
-
-                        {/* Image Container */}
-                        <View className="flex-1 items-center justify-center py-8">
+                    <View className="flex-1 px-6">
+                        {/* Top Section */}
+                        <View className="items-center pt-8">
                             <Image
                                 source={require("@/assets/images/splash_screen_house.png")}
                                 style={{
@@ -98,53 +115,94 @@ export default function Login() {
                             />
                         </View>
 
-                        {/* Login Form */}
-                        <View className="bg-white rounded-[24px] p-6 shadow-lg mx-auto w-full"
-                            style={{ maxWidth: isTablet ? 600 : 450 }}>
+                        {/* Welcome Text */}
+                        <View className="mt-6 mb-8">
                             <Text
-                                style={{
-                                    fontSize: getFontSize(isTablet ? 22 : 18),
-                                    marginBottom: isTablet ? 24 : 20
-                                }}
-                                className="font-semibold text-gray-800"
+                                className="text-primary-600 font-semibold mb-2"
+                                style={{ fontSize: getFontSize(isTablet ? 16 : 14) }}
                             >
-                                Enter your phone number
+                                Welcome back
                             </Text>
+                            <Heading
+                                text="Find Your Dream Home"
+                                className="text-gray-800"
+                                style={{
+                                    fontSize: getFontSize(isTablet ? 28 : 24),
+                                    lineHeight: getFontSize(isTablet ? 34 : 30)
+                                }}
+                            />
+                        </View>
 
-                            <View className="mb-6">
-                                <InputWithLabel
-                                    value={phoneNumber}
-                                    onChangeText={text => setPhoneNumber(text.replace(/[^0-9]/g, ''))}
-                                    placeholder="Enter your phone number"
-                                    keyboardType="numeric"
-                                    maxLength={10}
-                                    style={{
-                                        fontSize: getFontSize(isTablet ? 18 : 16),
-                                        paddingVertical: isTablet ? 16 : 12,
-                                        paddingHorizontal: isTablet ? 20 : 16,
-                                    }}
-                                />
-                            </View>
+                        {/* Login Form */}
+                        <View className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+                            <Input
+                                label="Email Address"
+                                value={formData.email}
+                                onChangeText={(text) => {
+                                    setFormData(prev => ({ ...prev, email: text }));
+                                    setErrors({});
+                                }}
+                                placeholder="Enter your email"
+                                keyboardType="email-address"
+                                error={errors.email}
+                                containerStyle={{ marginBottom: 16 }}
+                                leftIcon="mail"
+                            />
+
+                            <Input
+                                label="Password"
+                                value={formData.password}
+                                onChangeText={(text) => {
+                                    setFormData(prev => ({ ...prev, password: text }));
+                                    setErrors({});
+                                }}
+                                placeholder="Enter your password"
+                                isPassword
+                                error={errors.password}
+                                containerStyle={{ marginBottom: 12 }}
+                                leftIcon="lock"
+                            />
 
                             <TouchableOpacity
-                                onPress={handleContinue}
-                                style={{
-                                    backgroundColor: colors.primary.main,
-                                    borderRadius: isTablet ? 20 : 16,
-                                    paddingVertical: isTablet ? 18 : 14,
-                                    elevation: 2,
-                                    shadowColor: colors.primary.dark,
-                                    shadowOffset: { width: 0, height: 2 },
-                                    shadowOpacity: 0.2,
-                                    shadowRadius: 4,
-                                }}
-                                activeOpacity={0.8}
+                                onPress={() => router.push('/(auth)/forgotpassword')}
+                                className="mb-6"
                             >
                                 <Text
-                                    className="text-center text-white font-semibold"
-                                    style={{ fontSize: getFontSize(isTablet ? 18 : 16) }}
+                                    className="text-right text-primary-600 font-medium"
+                                    style={{ fontSize: getFontSize(isTablet ? 15 : 13) }}
                                 >
-                                    Continue
+                                    Forgot your password?
+                                </Text>
+                            </TouchableOpacity>
+
+                            <Button
+                                text="Sign In"
+                                onPress={handleLogin}
+                                loading={isLoading}
+                                disabled={!formData.email || !formData.password || isLoading}
+                                className="bg-primary-600 py-4 rounded-2xl"
+                                textClassName="font-semibold"
+                                loadingColor={colors.common.white}
+                            />
+                        </View>
+
+                        {/* Sign Up Link */}
+                        <View className="flex-row justify-center mt-6 mb-4">
+                            <Text
+                                className="text-gray-600"
+                                style={{ fontSize: getFontSize(isTablet ? 15 : 14) }}
+                            >
+                                Don't have an account?{' '}
+                            </Text>
+                            <TouchableOpacity
+                                onPress={() => router.push('/(auth)/signup')}
+                                className="active:opacity-70"
+                            >
+                                <Text
+                                    className="text-primary-600 font-semibold"
+                                    style={{ fontSize: getFontSize(isTablet ? 15 : 14) }}
+                                >
+                                    Create Account
                                 </Text>
                             </TouchableOpacity>
                         </View>

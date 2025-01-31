@@ -11,6 +11,12 @@ platform :ios, podfile_properties['ios.deploymentTarget'] || '15.1'
 install! 'cocoapods',
   :deterministic_uuids => false
 
+  use_modular_headers!
+  pod 'Firebase', :modular_headers => true
+  pod 'FirebaseCore', :modular_headers => true
+  pod 'FirebaseAuth', :modular_headers => true
+  pod 'GoogleUtilities', :modular_headers => true
+
 prepare_react_native_project!
 
 target 'frontend' do

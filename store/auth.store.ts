@@ -41,6 +41,7 @@ interface SigninResponse {
         email: string;
         firstName: string;
         lastName: string;
+        deviceToken?: string;
     };
 }
 
@@ -182,20 +183,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         try {
             set({ isLoading: true, error: null });
 
-            // Cast the response to our interface
+            console.log("Signing in with device info:", {
+                email: data.email,
+                deviceType: data.deviceType,
+                deviceTokenLength: data.deviceToken?.length || 0
+            });
+
             const response = await authService.signin(data) as SigninResponse;
             console.log("Signin Response:", response);
 
             if (response.success && response.token && response.user) {
                 try {
-                    // Store in AsyncStorage
-                    await AsyncStorage.setItem(STORAGE_KEYS.TOKEN, response.token);
-                    await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(response.user));
+                    // Store device token along with other user data
+                    const userData = {
+                        ...response.user,
+                        deviceToken: data.deviceToken // Store device token with user data
+                    };
 
-                    // Update store state
+                    await AsyncStorage.setItem(STORAGE_KEYS.TOKEN, response.token);
+                    await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
+
                     set({
                         // @ts-ignore
-                        user: response.user,
+                        user: userData,
                         token: response.token
                     });
 

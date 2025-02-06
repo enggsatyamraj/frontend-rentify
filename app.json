@@ -31,6 +31,13 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/splash_screen_house.png",
+          "color": "#ffffff"
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
@@ -46,13 +53,6 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow Rentify to use your location.",
           "locationWhenInUsePermission": "Allow Rentify to use your location while using the app."
-        }
-      ],
-      "@react-native-firebase/app",
-      [
-        "@react-native-firebase/auth",
-        {
-          "phoneAuthEnabled": true
         }
       ]
     ],

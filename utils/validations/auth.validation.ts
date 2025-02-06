@@ -63,7 +63,11 @@ export const signupSchema = z.object({
 
 export const signinSchema = z.object({
     ...emailSchema,
-    password: z.string().min(1, "Password is required")
+    password: z.string().min(1, "Password is required"),
+    // deviceToken: z.string().min(1, "Device token is required"),
+    // deviceType: z.enum(['ios', 'android', 'web'], {
+    //     required_error: "Device type is required"
+    // })
 });
 
 export const verifyOtpSchema = z.object({
@@ -94,6 +98,33 @@ export const resetPasswordSchema = z.object({
         .refine(val => !val.includes(' '), "Password cannot contain spaces")
 });
 
+export const updateProfileSchema = z.object({
+    firstName: nameSchema.firstName.optional(),
+    lastName: nameSchema.lastName.optional(),
+    phoneNumber: z.string()
+        .regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format")
+        .transform(val => val.trim())
+        .optional(),
+    dateOfBirth: z.string()
+        .datetime("Invalid date format")
+        .optional(),
+    aadharNumber: z.string()
+        .length(12, "Aadhar number must be exactly 12 digits")
+        .regex(/^\d+$/, "Aadhar number must contain only numbers")
+        .optional(),
+    address: z.object({
+        street: z.string().min(1).max(100).optional(),
+        city: z.string().min(1).max(50).optional(),
+        region: z.string().min(1).max(50).optional(),
+        country: z.string().min(1).max(50).optional(),
+        postalCode: z.string().min(1).max(20).optional(),
+        coordinates: z.object({
+            latitude: z.number().min(-90).max(90).optional(),
+            longitude: z.number().min(-180).max(180).optional()
+        }).optional()
+    }).optional()
+});
+
 // Inferred types
 export type SignupFormData = z.infer<typeof signupSchema>;
 export type SigninFormData = z.infer<typeof signinSchema>;
@@ -101,13 +132,20 @@ export type VerifyOtpFormData = z.infer<typeof verifyOtpSchema>;
 export type ResendOtpFormData = z.infer<typeof resendOtpSchema>;
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
+export type UpdateProfileFormData = z.infer<typeof updateProfileSchema>;
 
 export const validateForm = async <T>(
     schema: z.ZodSchema<T>,
     data: T
 ): Promise<{ success: boolean; error?: string }> => {
     try {
-        await schema.parseAsync(data);
+        const result = await schema.safeParseAsync(data);
+        if (!result.success) {
+            return {
+                success: false,
+                error: result.error.errors[0].message
+            };
+        }
         return { success: true };
     } catch (error) {
         if (error instanceof z.ZodError) {

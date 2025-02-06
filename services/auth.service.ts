@@ -1,5 +1,6 @@
 import { BASE_URL } from "@/utils/const";
 import { ForgotPasswordData, ResendOtpData, ResetPasswordData, SigninData, SignupData, VerifyOtpData } from "@/utils/interface/auth.interface";
+import { UpdateProfileFormData } from "@/utils/validations/auth.validation";
 
 
 export const authService = {
@@ -88,6 +89,31 @@ export const authService = {
             body: JSON.stringify(data)
         });
         const result = await response.json();
+        if (!response.ok) throw new Error(result.message);
+        return result;
+    },
+
+    async updateProfile(data: UpdateProfileFormData, token: string | null) {
+        // Transform coordinates to GeoJSON format if present
+        if (data.address?.coordinates) {
+            data.address.location = {
+                type: 'Point',
+                coordinates: [data.address.coordinates.longitude, data.address.coordinates.latitude]
+            };
+            delete data.address.coordinates;
+        }
+
+        const response = await fetch(`${BASE_URL}/auth/update`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        console.log("Update Profile Result:", result);
         if (!response.ok) throw new Error(result.message);
         return result;
     }

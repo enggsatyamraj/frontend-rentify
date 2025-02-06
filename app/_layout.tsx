@@ -2,6 +2,7 @@ import 'react-native-reanimated'
 import 'react-native-gesture-handler'
 import { Stack } from "expo-router";
 import "../global.css";
+import Toast from 'react-native-toast-message';
 
 export default function Layout() {
     return (
@@ -9,6 +10,7 @@ export default function Layout() {
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name='(home)' options={{ headerShown: false }} />
+            <Toast />
         </Stack>
     )
 }

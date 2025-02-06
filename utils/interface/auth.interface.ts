@@ -5,6 +5,7 @@ export interface User {
     email: string;
     isVerified: string;
     token: string;
+    deviceToken?: string;
 }
 
 export interface SignupData {
@@ -18,7 +19,10 @@ export interface SignupData {
 export interface SigninData {
     email: string;
     password: string;
+    deviceToken: string;
+    deviceType: 'ios' | 'android' | 'web';
 }
+
 
 export interface VerifyOtpData {
     email: string;

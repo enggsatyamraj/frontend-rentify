@@ -9,6 +9,7 @@ interface ButtonProps {
     disabled?: boolean;
     variant?: 'primary' | 'secondary';
     className?: string;
+    textClassName?: string
 }
 
 export const Button = ({
@@ -17,7 +18,8 @@ export const Button = ({
     loading = false,
     disabled = false,
     variant = 'primary',
-    className = ''
+    className = '',
+    textClassName = ''
 }: ButtonProps) => {
     const isTablet = getDeviceType() === 'tablet';
 
@@ -43,7 +45,7 @@ export const Button = ({
                 <ActivityIndicator color="white" />
             ) : (
                 <Text
-                    className={`text-center font-semibold ${variant === 'primary' ? 'text-white' : 'text-primary'
+                    className={`text-center ${textClassName} font-semibold ${variant === 'primary' ? 'text-white' : 'text-primary'
                         }`}
                     style={{ fontSize: getFontSize(isTablet ? 18 : 16) }}
                 >

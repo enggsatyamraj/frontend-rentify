@@ -93,15 +93,16 @@ export default function Login() {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.default }}>
             <StatusBar barStyle="dark-content" backgroundColor={colors.background.default} />
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ flexGrow: 1 }}
-                keyboardShouldPersistTaps="handled"
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={{ flex: 1 }}
             >
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === "ios" ? "padding" : "height"}
-                    style={{ flex: 1 }}
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ flexGrow: 0 }}
+                    keyboardShouldPersistTaps="handled"
                 >
+
                     <View className="flex-1 px-6">
                         {/* Top Section */}
                         <View className="items-center pt-8">
@@ -207,8 +208,9 @@ export default function Login() {
                             </TouchableOpacity>
                         </View>
                     </View>
-                </KeyboardAvoidingView>
-            </ScrollView>
+                </ScrollView>
+            </KeyboardAvoidingView>
+
         </SafeAreaView>
     );
 }

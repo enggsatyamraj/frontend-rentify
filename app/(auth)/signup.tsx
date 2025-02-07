@@ -61,14 +61,15 @@ export default function Signup() {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.default }}>
             <StatusBar barStyle="dark-content" backgroundColor={colors.background.default} />
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ flexGrow: 1 }}
-                keyboardShouldPersistTaps="handled"
+
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={{ flex: 1 }}
             >
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === "ios" ? "padding" : "height"}
-                    style={{ flex: 1 }}
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ flexGrow: 1 }}
+                    keyboardShouldPersistTaps="handled"
                 >
                     <View className="flex-1 px-6 pt-4">
                         {/* Header Section */}
@@ -216,8 +217,9 @@ export default function Signup() {
                             </TouchableOpacity>
                         </View>
                     </View>
-                </KeyboardAvoidingView>
-            </ScrollView>
+                </ScrollView>
+            </KeyboardAvoidingView>
+
         </SafeAreaView>
     );
 }

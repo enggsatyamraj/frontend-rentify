@@ -1,178 +1,117 @@
-import { View, Text, ScrollView, Modal, Image } from "react-native";
-import React, { useState, useEffect } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Button } from "@/components/Button";
-import { getFontSize } from "@/utils/font";
-import InputWithLabel from "@/components/InputWithLabel";
-import { propertyService } from "@/services/property.services";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { CreatePropertyFormData } from "@/utils/validations/property.validation";
-import { MaterialIcons } from '@expo/vector-icons';
+import { View, Text, ScrollView, TouchableOpacity, Dimensions, Modal } from 'react-native'
+import React, { useEffect } from 'react'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { getFontSize } from '@/utils/font'
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import colors from '@/utils/color';
+import { useAuthStore } from '@/store/auth.store';
+import { propertyService } from '@/services/property.services';
 
-export default function ListProperty() {
-    const [listedProperties, setListedProperties] = useState<any[]>([]);
-    const [showListPropertyModal, setShowListPropertyModal] = useState<boolean>(false);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [formData, setFormData] = useState<Partial<CreatePropertyFormData>>({});
-    const [images, setImages] = useState<File[]>([]);
-    const [errorMessage, setErrorMessage] = useState<string>("");
-
-    // Fetch user's properties
-    const fetchProperties = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token');
-            if (!token) {
-                setErrorMessage("Please login to list properties");
-                return;
+export default function listProperty() {
+    const height = Dimensions.get('window').height;
+    const width = Dimensions.get('window').width;
+    const [showListModal, setShowListModal] = React.useState<boolean>(false);
+    const token = useAuthStore(state => state.token);
+    const [userPropertyLoading, setUserPropertyLoading] = React.useState<boolean>(false);
+    const [properties, setProperties] = React.useState<any[]>([]);
+    const getResponsiveButtonShape = () => {
+        if (width > 1024) {
+            return {
+                width: 200,
+                height: 50,
+                borderRadius: 10
             }
-
-            const response = await propertyService.getUserProperties(token);
-            setListedProperties(response.data);
-        } catch (error: any) {
-            setErrorMessage(error.message);
-        } finally {
-            setLoading(false);
         }
-    };
+        return {
+            width: 150,
+            height: 40,
+            borderRadius: 8
+        }
+    }
 
     useEffect(() => {
-        fetchProperties();
-    }, []);
-
-    const handleListProperty = () => {
-        setShowListPropertyModal(true);
-    };
-
-    const handleSubmitProperty = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token');
-            if (!token) {
-                setErrorMessage("Please login to list properties");
-                return;
+        const fetchUserProperties = async () => {
+            try {
+                setUserPropertyLoading(true);
+                const response = await propertyService.getUserProperties(token!);
+                console.log('User properties:', response.data);
+                setProperties(response.data);
+            } catch (error) {
+                console.error('Error fetching user properties:', error)
+            } finally {
+                setUserPropertyLoading(false);
             }
-
-            await propertyService.createProperty(formData as CreatePropertyFormData, images, token);
-            setShowListPropertyModal(false);
-            fetchProperties(); // Refresh the list
-        } catch (error: any) {
-            setErrorMessage(error.message);
         }
-    };
+        fetchUserProperties();
+    }, [])
 
-    const PropertyCard = ({ property }: { property: any }) => (
-        <View className="mb-4 bg-white rounded-lg shadow p-4">
-            {property.images && property.images[0] && (
-                <Image
-                    source={{ uri: property.images[0].url }}
-                    className="w-full h-48 rounded-lg mb-3"
-                />
-            )}
-            <Text className="text-lg font-bold mb-2">{property.title}</Text>
-            <Text className="text-gray-600 mb-2">₹{property.price.basePrice}/month</Text>
-            <Text className="text-gray-500">{property.location.city}</Text>
-        </View>
-    );
 
-    const renderPropertyForm = () => (
-        <View className="space-y-4">
-            <InputWithLabel
-                label="Property Title"
-                value={formData.title}
-                onChangeText={(text) => setFormData({ ...formData, title: text })}
-                placeholder="Enter property title"
-            />
-
-            <InputWithLabel
-                label="Description"
-                value={formData.description}
-                onChangeText={(text) => setFormData({ ...formData, description: text })}
-                placeholder="Describe your property"
-                multiline
-                numberOfLines={4}
-            />
-
-            <InputWithLabel
-                label="Base Price (₹)"
-                value={formData.price?.basePrice?.toString()}
-                onChangeText={(text) => setFormData({
-                    ...formData,
-                    price: {
-                        ...formData.price,
-                        basePrice: parseInt(text) || 0
-                    }
-                })}
-                placeholder="Enter base price"
-                keyboardType="numeric"
-            />
-
-            {/* Add more fields based on your property schema */}
-
-            <Button
-                text="List Property"
-                onPress={handleSubmitProperty}
-                className="mt-4"
-            />
-        </View>
-    );
-
+    const openListModel = () => {
+        setShowListModal(prev => prev = !prev)
+    }
     return (
-        <SafeAreaView className="flex-1">
-            <ScrollView className="px-3 py-6">
-                <View className="flex flex-row items-center justify-between mb-6">
-                    <Text style={{ fontSize: getFontSize(20) }} className="font-bold">
-                        Your Properties
-                    </Text>
-                    <Button
-                        className="px-5 py-2"
-                        text="Add New"
-                        variant="primary"
-                        onPress={handleListProperty}
-                    />
-                </View>
-
-                {loading ? (
-                    <Text>Loading properties...</Text>
-                ) : errorMessage ? (
-                    <Text className="text-red-500">{errorMessage}</Text>
-                ) : listedProperties.length === 0 ? (
-                    <View className="flex-1 items-center justify-center py-8">
-                        <MaterialIcons name="home" size={64} color="#9ca3af" />
-                        <Text className="text-gray-500 mt-4 text-center">
-                            You haven't listed any properties yet.{'\n'}
-                            Add your first property to get started!
-                        </Text>
-                    </View>
-                ) : (
-                    <View>
-                        {listedProperties.map((property) => (
-                            <PropertyCard key={property._id} property={property} />
-                        ))}
-                    </View>
-                )}
-
-                <Modal
-                    animationType="slide"
-                    transparent={false}
-                    visible={showListPropertyModal}
+        <SafeAreaView className='border-2 border-blue-700 flex-1'>
+            <View className='flex-1'>
+                <ScrollView className='px-3 py-3'>
+                    <Text style={{ fontSize: getFontSize(23) }}>Listed Property</Text>
+                </ScrollView>
+                <TouchableOpacity
+                    onPress={openListModel}
+                    style={{
+                        backgroundColor: colors.primary.dark,
+                        width: 60,
+                        height: 60,
+                        borderRadius: 30,
+                        position: 'absolute',
+                        bottom: 90,
+                        right: 20,
+                        shadowColor: "#000",
+                        shadowOffset: {
+                            width: 0,
+                            height: 2,
+                        },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 3.84,
+                        elevation: 5,
+                    }}
+                    className='flex justify-center items-center'
                 >
-                    <SafeAreaView className="flex-1">
-                        <ScrollView className="px-3 py-6">
-                            <View className="flex flex-row items-center justify-between mb-6">
-                                <Text style={{ fontSize: getFontSize(20) }} className="font-bold">
-                                    List Your Property
-                                </Text>
-                                <Button
-                                    className="px-3 py-2"
-                                    text="Close"
-                                    variant="secondary"
-                                    onPress={() => setShowListPropertyModal(false)}
-                                />
-                            </View>
-                            {renderPropertyForm()}
+                    <FontAwesome6 name="plus" size={24} color={'#fff'} />
+                </TouchableOpacity>
+
+                {/* list property model */}
+                <Modal animationType='slide' visible={showListModal} >
+                    <SafeAreaView className='flex-1 bg-white'>
+                        {/* Header */}
+                        <View className='flex-row justify-between items-center px-4 py-3 border-b border-gray-200'>
+                            <Text className='text-xl font-semibold'>List your Property</Text>
+                            <TouchableOpacity
+                                onPress={openListModel}
+                                className='p-2'
+                            >
+                                <FontAwesome6 name="xmark" size={24} color={'#000'} />
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Content */}
+                        <ScrollView className='flex-1 px-4 py-3'>
+                            <Text>Content inside the modal</Text>
                         </ScrollView>
                     </SafeAreaView>
                 </Modal>
-            </ScrollView>
+
+                {
+                    properties.length == 0 ? (
+                        <View className='border-2 border-red-900 justify-center items-center'>
+                            <Text className='text-lg'>No property listed yet</Text>
+                        </View>
+                    ) : (
+                        <View>
+                            <Text>Your properties will be seen here</Text>
+                        </View>
+                    )
+                }
+            </View>
         </SafeAreaView>
-    );
+    )
 }

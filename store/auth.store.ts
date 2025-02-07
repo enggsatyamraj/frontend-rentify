@@ -41,7 +41,10 @@ interface SigninResponse {
         email: string;
         firstName: string;
         lastName: string;
-        deviceToken?: string;
+        // deviceToken?: string;
+        phoneNumber?: string;
+        profileImage?: string,
+        aadharNumber?: string
     };
 }
 
@@ -190,7 +193,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             });
 
             const response = await authService.signin(data) as SigninResponse;
-            console.log("Signin Response:", response);
+            console.log("Signin Response::::::::::::::::::::", response);
 
             if (response.success && response.token && response.user) {
                 try {

@@ -6,6 +6,9 @@ export interface User {
     isVerified: string;
     token: string;
     deviceToken?: string;
+    phoneNumber?: string;
+    profilePicture?: string;
+    aadharNumber?: string;
 }
 
 export interface SignupData {

@@ -9,7 +9,8 @@ interface ButtonProps {
     disabled?: boolean;
     variant?: 'primary' | 'secondary';
     className?: string;
-    textClassName?: string
+    textClassName?: string,
+    loadingColor?: string,
 }
 
 export const Button = ({
@@ -19,7 +20,8 @@ export const Button = ({
     disabled = false,
     variant = 'primary',
     className = '',
-    textClassName = ''
+    textClassName = '',
+    loadingColor = 'white',
 }: ButtonProps) => {
     const isTablet = getDeviceType() === 'tablet';
 
@@ -42,7 +44,7 @@ export const Button = ({
             activeOpacity={0.8}
         >
             {loading ? (
-                <ActivityIndicator color="white" />
+                <ActivityIndicator color={loadingColor} />
             ) : (
                 <Text
                     className={`text-center ${textClassName} font-semibold ${variant === 'primary' ? 'text-white' : 'text-primary'

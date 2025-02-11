@@ -83,7 +83,7 @@ export default function TabLayout() {
                     }}
                 />
                 <Tabs.Screen
-                    name="profile"
+                    name="(profile)"
                     options={{
                         title: 'Profile',
                         tabBarIcon: ({ color }) => (

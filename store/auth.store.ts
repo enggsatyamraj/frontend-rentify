@@ -192,8 +192,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 deviceTokenLength: data.deviceToken?.length || 0
             });
 
-            const response = await authService.signin(data) as SigninResponse;
-            console.log("Signin Response::::::::::::::::::::", response);
+            const response = await authService.signin(data);
+            // console.log("Signin Response::::::::::::::::::::", response);
 
             if (response.success && response.token && response.user) {
                 try {
@@ -202,6 +202,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                         ...response.user,
                         deviceToken: data.deviceToken // Store device token with user data
                     };
+
+                    // console.log("this is the userData from the authStore inside the sign in function ::::::::::::", userData);
 
                     await AsyncStorage.setItem(STORAGE_KEYS.TOKEN, response.token);
                     await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));

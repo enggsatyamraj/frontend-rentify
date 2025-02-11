@@ -57,11 +57,12 @@ export const authService = {
     },
 
     async getProfile(token: string) {
-        const response = await fetch(`${BASE_URL}/auth/profile`, {
+        const response = await fetch(`${BASE_URL}/auth/user-details`, {
             headers: {
                 "Authorization": `Bearer ${token}`
             }
         });
+        console.log("get profile is hitted")
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
         return result.data;

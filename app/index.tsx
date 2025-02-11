@@ -15,6 +15,8 @@ import colors from "@/utils/color";
 import { STORAGE_KEYS, useAuthStore } from "@/store/auth.store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+
+
 export default function SplashScreen() {
     const router = useRouter();
     const height = Dimensions.get("window").height;

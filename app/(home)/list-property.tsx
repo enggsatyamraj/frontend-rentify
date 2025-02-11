@@ -156,7 +156,7 @@ export default function listProperty() {
                                                     </Text>
                                                     <Button text="Add details" className="px-3 mt-4" onPress={() => {
                                                         setShowListModal(false);
-                                                        router.push("/(home)/profile")
+                                                        router.push("/(home)/(profile)/profiledetails")
                                                     }} />
                                                 </View>
                                             )

@@ -7,8 +7,28 @@ export interface User {
     token: string;
     deviceToken?: string;
     phoneNumber?: string;
-    profilePicture?: string;
+    profileImage?: string;
     aadharNumber?: string;
+    dateOfBirth?: string;
+    address?: {
+        street?: string
+        city?: string
+        region?: string;
+        country?: {
+            type: string,
+        },
+        postalCode?: {
+            type: string,
+        },
+        coordinates?: {
+            latitude?: {
+                type: number,
+            },
+            longitude?: {
+                type: number,
+            },
+        },
+    }
 }
 
 export interface SignupData {

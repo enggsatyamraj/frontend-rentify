@@ -1,15 +1,13 @@
 import {
     View,
     Text,
-    ScrollView,
     TouchableOpacity,
     Dimensions,
-    Modal,
-    Image,
     ActivityIndicator,
-    RefreshControl
+    RefreshControl,
+    StyleSheet
 } from "react-native";
-import React, { useEffect } from "react";
+import React, { useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getFontSize } from "@/utils/font";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -20,41 +18,34 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Button } from "@/components/Button";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { router } from "expo-router";
+import ActionSheet, { ScrollView } from 'react-native-actions-sheet';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import PropertyForm from "@/components/PropertyForm";
+import ListPropertyForm from "@/components/ListPropertyForm";
 
-export default function listProperty() {
+export default function ListProperty() {
     const height = Dimensions.get("window").height;
-    const width = Dimensions.get("window").width;
-    const [showListModal, setShowListModal] = React.useState<boolean>(false);
     const token = useAuthStore((state) => state.token);
     const user = useAuthStore((state) => state.user);
-    const [userPropertyLoading, setUserPropertyLoading] =
-        React.useState<boolean>(false);
-    const [properties, setProperties] = React.useState<any[]>([]);
-    const [refreshing, setRefreshing] = React.useState<boolean>(false);
+    const [userPropertyLoading, setUserPropertyLoading] = React.useState(false);
+    const [properties, setProperties] = React.useState([]);
+    const [refreshing, setRefreshing] = React.useState(false);
+    const listPropertyActionRef = useRef(null);
 
+    const openListPropertyActionSheet = () => {
+        // @ts-ignore
+        listPropertyActionRef.current?.show();
+    };
 
-    const getResponsiveButtonShape = () => {
-        if (width > 1024) {
-            return {
-                width: 200,
-                height: 50,
-                borderRadius: 10,
-            };
-        }
-        return {
-            width: 150,
-            height: 40,
-            borderRadius: 8,
-        };
+    const closeListPropertyActionSheet = () => {
+        // @ts-ignore
+        listPropertyActionRef.current?.hide();
     };
 
     const fetchUserProperties = async () => {
         try {
-            console.log("this is the token:::::::::::::: ", token);
-            console.log("this is the user:::::::::::::: ", user);
             setUserPropertyLoading(true);
-            const response = await propertyService.getUserProperties(token!);
-            console.log("User properties:", response.data);
+            const response = await propertyService.getUserProperties(token);
             setProperties(response.data);
         } catch (error) {
             console.error("Error fetching user properties:", error);
@@ -67,7 +58,7 @@ export default function listProperty() {
     const onRefresh = React.useCallback(() => {
         setRefreshing(true);
         fetchUserProperties();
-    }, [token])
+    }, [token]);
 
     useFocusEffect(
         React.useCallback(() => {
@@ -75,124 +66,206 @@ export default function listProperty() {
         }, [token])
     );
 
-    const handleOpen = () => {
-        setShowListModal(prev => !prev);
-        console.log("add property button clicked");
-    };
+    const renderEmptyState = () => (
+        <View style={styles.emptyStateContainer}>
+            <Text style={styles.emptyStateTitle}>
+                No Properties Listed Yet
+            </Text>
+            <Text style={styles.emptyStateDescription}>
+                Start listing your properties to reach potential tenants.
+                It only takes a few minutes!
+            </Text>
+            <Button
+                text="Add Property"
+                onPress={openListPropertyActionSheet}
+                className="px-2"
+                variant="primary"
+            />
+        </View>
+    );
+
+    const renderVerificationRequest = () => (
+        <View style={styles.verificationContainer}>
+            <View style={styles.verificationHeader}>
+                <Text style={styles.verificationTitle}>List your properties</Text>
+                <TouchableOpacity onPress={closeListPropertyActionSheet}>
+                    <AntDesign name="close" size={26} color="black" />
+                </TouchableOpacity>
+            </View>
+            <View style={[styles.verificationContent, { height: height - 200 }]}>
+                <Text style={styles.verificationText}>
+                    Please add your phone number and aadhar number to list your property
+                </Text>
+                <Button
+                    text="Add details"
+                    className="px-3 mt-4"
+                    onPress={() => {
+                        closeListPropertyActionSheet();
+                        router.push("/(home)/(profile)/profiledetails");
+                    }}
+                />
+            </View>
+        </View>
+    );
+
+    const renderAddPropertyButton = () => (
+        <TouchableOpacity
+            style={styles.addButton}
+            onPress={openListPropertyActionSheet}
+        >
+            <FontAwesome6 name="plus" size={24} color="#fff" />
+        </TouchableOpacity>
+    );
 
     return (
-        <SafeAreaView className="flex-1">
-            <View className="flex-1">
-                <ScrollView className="px-3 py-3"
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={onRefresh}
-                            colors={[colors.primary.main]} // Android
-                            tintColor={colors.primary.main} // iOS
-                            title="Pull to refresh" // iOS
-                            titleColor={colors.primary.main} // iOS
-                        />
-                    }
-
-                >
-                    {properties.length > 0 && (
-                        <Text style={{ fontSize: getFontSize(23) }}>Listed Property</Text>
-                    )}
-                    <View
-                        style={{ minHeight: Dimensions.get("window").height - 200 }}
-                        className="flex-1 justify-center items-center"
+        <GestureHandlerRootView style={styles.container}>
+            <SafeAreaView style={styles.container}>
+                <View style={styles.container}>
+                    <ScrollView
+                        contentContainerStyle={styles.scrollContent}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                                colors={[colors.primary.main]}
+                                tintColor={colors.primary.main}
+                                title="Pull to refresh"
+                                titleColor={colors.primary.main}
+                            />
+                        }
                     >
-                        {userPropertyLoading ? (
-                            <View className="">
-                                <ActivityIndicator size="large" color={colors.primary.dark} />
-                            </View>
-                        ) : (
-                            <View className="flex-1 items-center justify-center py-8">
-                                {properties.length === 0 && (
-                                    <View className="items-center px-4">
-                                        <Text
-                                            className="text-gray-800 text-center mb-2"
-                                            style={{ fontSize: getFontSize(20), fontWeight: "600" }}
-                                        >
-                                            No Properties Listed Yet
-                                        </Text>
-
-                                        <Text
-                                            className="text-gray-500 text-center mb-6"
-                                            style={{ fontSize: getFontSize(14) }}
-                                        >
-                                            Start listing your properties to reach potential tenants.
-                                            It only takes a few minutes!
-                                        </Text>
-
-                                        <Button
-                                            text="Add Property"
-                                            onPress={handleOpen}
-                                            className="px-2"
-                                            variant="primary"
-                                        />
-                                    </View>
-                                )}
+                        {properties.length > 0 && (
+                            <View>
+                                <Text style={styles.title}>Listed Property</Text>
+                                {properties.map((property, index) => (
+                                    <Text>{property?.title}</Text>
+                                ))}
                             </View>
                         )}
-                    </View>
-                    <View>
-                        <Modal visible={showListModal} presentationStyle="formSheet" animationType="slide">
-                            <View style={{ flex: 1, backgroundColor: 'white' }}>
-                                <SafeAreaView className="px-3 py-3">
-                                    <ScrollView>
-                                        <View className="flex flex-row justify-between items-center">
-                                            <Text style={{ fontSize: getFontSize(22) }}>List your properties</Text>
-                                            <TouchableOpacity onPress={handleOpen}>
-                                                <AntDesign name="close" size={26} color="black" />
-                                            </TouchableOpacity>
-                                        </View>
-                                        {
-                                            (!user?.phoneNumber || !user?.aadharNumber) && (
-                                                <View style={{ flex: 1, justifyContent: "center", alignItems: "center", height: height - 200 }}>
-                                                    <Text style={{ fontSize: getFontSize(16), textAlign: "center" }}>
-                                                        Please add you phone number and aadhar number to list your property
-                                                    </Text>
-                                                    <Button text="Add details" className="px-3 mt-4" onPress={() => {
-                                                        setShowListModal(false);
-                                                        router.push("/(home)/(profile)/profiledetails")
-                                                    }} />
-                                                </View>
-                                            )
-                                        }
-                                    </ScrollView>
-                                </SafeAreaView>
-                            </View>
-                        </Modal>
-                    </View>
-                </ScrollView>
+                        <View style={styles.contentContainer}>
+                            {userPropertyLoading ? (
+                                <ActivityIndicator size="large" color={colors.primary.dark} />
+                            ) : (
+                                <View style={styles.mainContent}>
+                                    {properties.length === 0 && renderEmptyState()}
+                                </View>
+                            )}
+                        </View>
 
-                {properties.length > 0 && (
-                    <TouchableOpacity
-                        style={{
-                            backgroundColor: colors.primary.dark,
-                            width: 60,
-                            height: 60,
-                            borderRadius: 30,
-                            position: "absolute",
-                            bottom: 90,
-                            right: 20,
-                            shadowColor: "#000",
-                            shadowOffset: {
-                                width: 0,
-                                height: 2,
-                            },
-                            shadowOpacity: 0.25,
-                            shadowRadius: 3.84,
-                            elevation: 5,
-                        }}
-                        className="flex justify-center items-center"
-                    >
-                        <FontAwesome6 name="plus" size={24} color={"#fff"} />
-                    </TouchableOpacity>
-                )}
-            </View>
-        </SafeAreaView>
+                        <ActionSheet
+                            ref={listPropertyActionRef}
+                            containerStyle={styles.actionSheetContainer}
+                            gestureEnabled={true}
+                            closeOnTouchBackdrop={true}
+                            indicatorStyle={styles.actionSheetIndicator}
+                        >
+                            {(!user?.phoneNumber || !user?.aadharNumber)
+                                ? renderVerificationRequest()
+                                : (
+                                    <ListPropertyForm
+                                        closeListPropertyActionSheet={closeListPropertyActionSheet}
+                                    />
+                                )
+                            }
+                        </ActionSheet>
+                    </ScrollView>
+
+                    {properties.length > 0 && renderAddPropertyButton()}
+                </View>
+            </SafeAreaView>
+        </GestureHandlerRootView>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    scrollContent: {
+        padding: 12,
+    },
+    title: {
+        fontSize: getFontSize(23),
+    },
+    contentContainer: {
+        minHeight: Dimensions.get("window").height - 200,
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    mainContent: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 32,
+    },
+    emptyStateContainer: {
+        alignItems: 'center',
+        paddingHorizontal: 16,
+    },
+    emptyStateTitle: {
+        fontSize: getFontSize(20),
+        fontWeight: "600",
+        color: '#1f2937',
+        textAlign: 'center',
+        marginBottom: 8,
+    },
+    emptyStateDescription: {
+        fontSize: getFontSize(14),
+        color: '#6b7280',
+        textAlign: 'center',
+        marginBottom: 24,
+    },
+    actionSheetContainer: {
+        height: '95%',
+        borderTopRightRadius: 10,
+        borderTopLeftRadius: 10,
+        backgroundColor: 'white',
+    },
+    actionSheetIndicator: {
+        width: 60,
+        height: 4,
+        backgroundColor: '#ddd',
+        marginTop: 8,
+    },
+    verificationContainer: {
+        padding: 16,
+    },
+    verificationHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    verificationTitle: {
+        fontSize: getFontSize(22),
+    },
+    verificationContent: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    verificationText: {
+        fontSize: getFontSize(16),
+        textAlign: "center",
+    },
+    addButton: {
+        backgroundColor: colors.primary.dark,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        position: "absolute",
+        bottom: 90,
+        right: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+});

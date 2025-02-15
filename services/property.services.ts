@@ -13,28 +13,67 @@ export interface PropertyResponse {
     };
 }
 
+interface ImageUpload {
+    uri: string;
+    type: string;
+    name: string;
+}
+
 export const propertyService = {
-    async createProperty(data: CreatePropertyFormData, images: File[], token: string): Promise<PropertyResponse> {
-        const formData = new FormData();
+    async createProperty(data: CreatePropertyFormData, images: { uri: string, type: string, name: string }[], token: string): Promise<PropertyResponse> {
+        try {
+            const formData = new FormData();
 
-        // Append property data
-        formData.append('data', JSON.stringify(data));
+            // Add property data under 'body' key
+            formData.append('body', JSON.stringify({
+                title: data.title,
+                description: data.description,
+                propertyType: data.propertyType,
+                price: data.price,
+                location: data.location,
+                details: data.details,
+                amenities: data.amenities,
+                preferredTenants: data.preferredTenants,
+                availableFrom: data.availableFrom,
+                rules: data.rules,
+                foodAvailable: data.foodAvailable,
+                maintainenceCharges: data.maintainenceCharges
+            }));
 
-        // Append images
-        images.forEach((image) => {
-            formData.append('images', image);
-        });
+            // Append images with proper React Native FormData structure
+            images.forEach((image, index) => {
+                const fileExt = image.uri.split('.').pop();
+                formData.append('images', {
+                    uri: image.uri,
+                    type: `image/${fileExt}` || 'image/jpeg',
+                    name: `image-${index}.${fileExt}`,
+                } as any);
+            });
 
-        const response = await fetch(`${BASE_URL}/property`, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${token}`
-            },
-            body: formData
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.message);
-        return result;
+            console.log('Final FormData:', formData);
+
+            const response = await fetch(`${BASE_URL}/property`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Accept": "application/json",
+                    "Content-Type": "multipart/form-data",
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+            console.log('Response from server:', result);
+
+            if (!response.ok) {
+                const error = result.message || 'Failed to create property';
+                throw new Error(error);
+            }
+            return result;
+        } catch (error) {
+            console.error('Service error:', error);
+            throw error;
+        }
     },
 
     async getProperties(filters?: PropertyFilters): Promise<PropertyResponse> {

@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     Pressable,
     StyleSheet,
+    KeyboardType,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { getFontSize, getDeviceType } from "@/utils/font";
@@ -17,6 +18,8 @@ interface InputWithLabelProps extends TextInputProps {
     error?: string;
     secureTextEntry?: boolean;
     showToggle?: boolean;
+    isNumeric?: boolean;
+    onNumericChange?: (value: number) => void;
 }
 
 const InputWithLabel: React.FC<InputWithLabelProps> = ({
@@ -29,6 +32,9 @@ const InputWithLabel: React.FC<InputWithLabelProps> = ({
     onChangeText,
     placeholder,
     style,
+    isNumeric = false,
+    onNumericChange,
+    keyboardType,
     ...rest
 }) => {
     const [isSecure, setIsSecure] = React.useState(secureTextEntry);
@@ -47,8 +53,32 @@ const InputWithLabel: React.FC<InputWithLabelProps> = ({
         error: getFontSize(isTablet ? 14 : 12)
     });
 
+    const handleTextChange = (text: string) => {
+        if (isNumeric) {
+            // Remove any non-numeric characters except decimal point
+            const numericValue = text.replace(/[^0-9]/g, '');
+
+            // Convert to number or 0 if empty
+            const numberValue = numericValue === '' ? 0 : parseInt(numericValue, 10);
+
+            // Call the numeric change handler
+            onNumericChange?.(numberValue);
+
+            // Also call the original onChangeText if provided
+            onChangeText?.(numericValue);
+        } else {
+            // Normal text input handling
+            onChangeText?.(text);
+        }
+    };
+
     const fontSizes = getFontSizes();
     const inputHeight = getInputHeight();
+
+    // Determine keyboard type
+    const inputKeyboardType = isNumeric
+        ? 'numeric'
+        : (keyboardType || 'default');
 
     return (
         <View className="mb-4 space-y-2">
@@ -76,12 +106,14 @@ const InputWithLabel: React.FC<InputWithLabelProps> = ({
             <View className="relative flex-row items-center">
                 <TextInput
                     value={value}
-                    onChangeText={onChangeText}
+                    onChangeText={handleTextChange}
                     placeholder={placeholder}
                     secureTextEntry={isSecure}
                     placeholderTextColor="#6b7280"
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
+                    keyboardType={inputKeyboardType}
+                    returnKeyType={isNumeric ? "done" : rest.returnKeyType}
                     className={`
                         flex-1 px-4
                         text-gray-900

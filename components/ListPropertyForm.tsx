@@ -371,9 +371,7 @@ export default function ListPropertyForm({ closeListPropertyActionSheet }: ListP
             Alert.alert('Success', 'Property listed successfully', [
                 {
                     text: 'OK',
-                    onPress: () => {
-                        closeListPropertyActionSheet();
-                    }
+                    onPress: closeListPropertyActionSheet
                 }
             ]);
         } catch (error: any) {

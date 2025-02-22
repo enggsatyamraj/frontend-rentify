@@ -28,10 +28,11 @@ import ActionSheet from 'react-native-actions-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Carousel from 'react-native-reanimated-carousel';
 import ListPropertyForm from "@/components/ListPropertyForm";
+import EditPropertyForm from "@/components/EditPropertyForm";
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const PropertyCard = ({ property }) => {
+const PropertyCard = ({ property, onEditPress }) => {
     const [activeSlide, setActiveSlide] = useState(0);
 
     const images = property.images?.length > 0
@@ -65,6 +66,38 @@ const PropertyCard = ({ property }) => {
                 {property.status.isVerified ? 'Verified' : 'Unverified'}
             </Text>
         </View>
+    );
+
+    const renderEditButton = () => (
+        <TouchableOpacity
+            onPress={() => onEditPress(property)}
+            style={{
+                position: 'absolute',
+                top: 12,
+                left: 12,
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: colors.primary.dark,
+                paddingHorizontal: 10,
+                paddingVertical: 6,
+                borderRadius: 6,
+                zIndex: 1,
+            }}
+        >
+            <Feather
+                name="edit-2"
+                size={13}
+                color={colors.common.white}
+                style={{ marginRight: 4 }}
+            />
+            <Text style={{
+                color: colors.common.white,
+                fontSize: getFontSize(12),
+                fontWeight: '500',
+            }}>
+                Edit
+            </Text>
+        </TouchableOpacity>
     );
 
     const renderCarouselItem = ({ item }) => (
@@ -114,6 +147,7 @@ const PropertyCard = ({ property }) => {
             {/* Image Section */}
             <View style={{ height: 180, width: '100%', position: 'relative' }}>
                 {renderVerificationBadge()}
+                {renderEditButton()}
                 <Carousel
                     width={SCREEN_WIDTH - 24}
                     height={180}
@@ -257,6 +291,8 @@ export default function ListProperty() {
     const [allProperties, setAllProperties] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
     const listPropertyActionRef = useRef(null);
+    const editPropertyActionRef = useRef(null); // New ref for edit action sheet
+    const [currentPropertyToEdit, setCurrentPropertyToEdit] = useState(null);
     const [searchText, setSearchText] = useState('');
     const [debouncedSearchText, setDebouncedSearchText] = useState('');
     const [showFilters, setShowFilters] = useState(false);
@@ -353,6 +389,21 @@ export default function ListProperty() {
     const handlePropertyAdded = () => {
         fetchUserProperties();
         closeListPropertyActionSheet();
+    };
+
+    const openEditPropertyActionSheet = (property) => {
+        setCurrentPropertyToEdit(property);
+        editPropertyActionRef.current?.show();
+    };
+
+    const closeEditPropertyActionSheet = () => {
+        editPropertyActionRef.current?.hide();
+        setCurrentPropertyToEdit(null);
+    };
+
+    const handlePropertyUpdated = () => {
+        fetchUserProperties();
+        closeEditPropertyActionSheet();
     };
 
     const fetchUserProperties = async () => {
@@ -788,7 +839,12 @@ export default function ListProperty() {
                     <FlatList
                         contentContainerStyle={{ padding: 12 }}
                         data={properties}
-                        renderItem={({ item }) => <PropertyCard property={item} />}
+                        renderItem={({ item }) => (
+                            <PropertyCard
+                                property={item}
+                                onEditPress={openEditPropertyActionSheet}
+                            />
+                        )}
                         keyExtractor={(item) => item._id || item.id}
                         ListEmptyComponent={!userPropertyLoading && renderEmptyState()}
                         refreshControl={
@@ -843,6 +899,31 @@ export default function ListProperty() {
                                 />
                             )
                         }
+                    </ActionSheet>
+
+                    <ActionSheet
+                        ref={editPropertyActionRef}
+                        containerStyle={{
+                            height: '95%',
+                            borderTopRightRadius: 10,
+                            borderTopLeftRadius: 10,
+                            backgroundColor: colors.common.white,
+                        }}
+                        gestureEnabled={true}
+                        closeOnTouchBackdrop={true}
+                        indicatorStyle={{
+                            width: 60,
+                            height: 4,
+                            backgroundColor: colors.grey[300],
+                            marginTop: 8,
+                        }}
+                    >
+                        {currentPropertyToEdit && (
+                            <EditPropertyForm
+                                closeEditPropertyActionSheet={handlePropertyUpdated}
+                                property={currentPropertyToEdit}
+                            />
+                        )}
                     </ActionSheet>
 
                     {properties.length > 0 && renderAddPropertyButton()}

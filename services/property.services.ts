@@ -99,27 +99,63 @@ export const propertyService = {
         return result;
     },
 
-    async updateProperty(id: string, data: UpdatePropertyFormData, images: File[], token: string): Promise<PropertyResponse> {
-        const formData = new FormData();
+    async updateProperty(id: string, data: UpdatePropertyFormData, images: ImageUpload[], token: string): Promise<PropertyResponse> {
+        try {
+            const formData = new FormData();
 
-        // Append property data
-        formData.append('data', JSON.stringify(data));
+            // Add all data in a single JSON string under 'body' key, as you do in createProperty
+            formData.append('body', JSON.stringify({
+                title: data.title,
+                description: data.description,
+                propertyType: data.propertyType,
+                price: data.price,
+                location: data.location,
+                details: data.details,
+                amenities: data.amenities,
+                preferredTenants: data.preferredTenants,
+                availableFrom: data.availableFrom instanceof Date ? data.availableFrom.toISOString() : data.availableFrom,
+                rules: data.rules,
+                foodAvailable: data.foodAvailable,
+                maintainenceCharges: data.maintainenceCharges,
+                // Include existing images if any
+                images: data.images || []
+            }));
 
-        // Append new images if any
-        images.forEach((image) => {
-            formData.append('images', image);
-        });
+            // Append new images
+            if (images && images.length > 0) {
+                images.forEach((image, index) => {
+                    formData.append('images', {
+                        uri: image.uri,
+                        type: image.type || 'image/jpeg',
+                        name: image.name || `image-${index}.jpg`,
+                    } as any);
+                });
+            }
 
-        const response = await fetch(`${BASE_URL}/property/${id}`, {
-            method: "PUT",
-            headers: {
-                "Authorization": `Bearer ${token}`
-            },
-            body: formData
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.message);
-        return result;
+            console.log('Update FormData:', formData);
+
+            const response = await fetch(`${BASE_URL}/property/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Accept": "application/json",
+                    "Content-Type": "multipart/form-data",
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+            console.log('Response from server:', result);
+
+            if (!response.ok) {
+                const error = result.message || 'Failed to update property';
+                throw new Error(error);
+            }
+            return result;
+        } catch (error) {
+            console.error('Service error:', error);
+            throw error;
+        }
     },
 
     async deleteProperty(id: string, token: string): Promise<PropertyResponse> {

@@ -17,48 +17,42 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useAuthStore } from "@/store/auth.store";
 import colors from "@/utils/color";
-import { Feather, MaterialIcons, AntDesign } from '@expo/vector-icons';
+import { Feather, MaterialIcons, AntDesign, FontAwesome } from '@expo/vector-icons';
 import { getFontSize, getDeviceType } from "@/utils/font";
 import { Button } from "@/components/Button";
 import Carousel from 'react-native-reanimated-carousel';
 import { propertyService } from "@/services/property.services";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useIsFocused } from "@react-navigation/native";
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const PropertyCard = ({ property, onPress }) => {
+export const PropertyCard = ({ property, onPress, onWishlistToggle, isWishlisted }) => {
     const [activeSlide, setActiveSlide] = useState(0);
 
     const images = property.images?.length > 0
         ? property.images.map(img => img.url)
         : ['https://via.placeholder.com/400x200'];
 
-    const renderVerificationBadge = () => (
-        <View style={{
-            position: 'absolute',
-            top: 12,
-            right: 12,
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: property.status.isVerified ? 'rgba(34, 197, 94, 0.9)' : 'rgba(239, 68, 68, 0.9)',
-            paddingHorizontal: 10,
-            paddingVertical: 6,
-            borderRadius: 6,
-            zIndex: 1,
-        }}>
-            <MaterialIcons
-                name={property.status.isVerified ? "verified" : "error-outline"}
-                size={16}
-                color={colors.common.white}
-                style={{ marginRight: 4 }}
+    const renderWishlistButton = () => (
+        <TouchableOpacity
+            onPress={() => onWishlistToggle(property)}
+            style={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                zIndex: 2,
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                borderRadius: 20,
+                padding: 8,
+            }}
+        >
+            <FontAwesome
+                name={isWishlisted ? "heart" : "heart-o"}
+                size={20}
+                color={isWishlisted ? colors.primary.main : colors.text.primary}
             />
-            <Text style={{
-                color: colors.common.white,
-                fontSize: getFontSize(12),
-                fontWeight: '500',
-            }}>
-                {property.status.isVerified ? 'Verified' : 'Unverified'}
-            </Text>
-        </View>
+        </TouchableOpacity>
     );
 
     const renderCarouselItem = ({ item }) => (
@@ -109,7 +103,7 @@ const PropertyCard = ({ property, onPress }) => {
             }}>
             {/* Image Section */}
             <View style={{ height: 180, width: '100%', position: 'relative' }}>
-                {/* {renderVerificationBadge()} */}
+                {/* {renderWishlistButton()} */}
                 <Carousel
                     width={SCREEN_WIDTH - 24}
                     height={180}
@@ -254,6 +248,8 @@ export default function Home() {
     const [searchText, setSearchText] = useState('');
     const [debouncedSearchText, setDebouncedSearchText] = useState('');
     const [showFilters, setShowFilters] = useState(false);
+    const [wishlistedProperties, setWishlistedProperties] = useState([]);
+    const isFocused = useIsFocused();
     const [filters, setFilters] = useState({
         propertyType: '',
         priceRange: { min: '', max: '' },
@@ -265,7 +261,40 @@ export default function Home() {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
 
-    // Debounce search text
+    // Load wishlisted properties from AsyncStorage on mount
+    useEffect(() => {
+        loadWishlistedProperties();
+    }, [isFocused]);
+
+    const loadWishlistedProperties = async () => {
+        try {
+            const wishlist = await AsyncStorage.getItem('wishlistedProperties');
+            if (wishlist) {
+                setWishlistedProperties(JSON.parse(wishlist));
+            }
+        } catch (error) {
+            console.error('Error loading wishlist:', error);
+        }
+    };
+
+    const handleWishlistToggle = async (property) => {
+        try {
+            const isWishlisted = wishlistedProperties.includes(property._id);
+            let updatedWishlist;
+
+            if (isWishlisted) {
+                updatedWishlist = wishlistedProperties.filter(id => id !== property._id);
+            } else {
+                updatedWishlist = [...wishlistedProperties, property._id];
+            }
+
+            setWishlistedProperties(updatedWishlist);
+            await AsyncStorage.setItem('wishlistedProperties', JSON.stringify(updatedWishlist));
+        } catch (error) {
+            console.error('Error updating wishlist:', error);
+        }
+    };
+
     useEffect(() => {
         const timer = setTimeout(() => {
             setSearchText(debouncedSearchText);
@@ -333,7 +362,7 @@ export default function Home() {
 
     const handlePropertyPress = (property) => {
         router.push({
-            pathname: '/(home)/property-details',
+            pathname: '/property-details',
             params: { id: property._id }
         });
     };
@@ -723,43 +752,6 @@ export default function Home() {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.default, paddingBottom: 30 }}>
             <StatusBar barStyle="dark-content" backgroundColor={colors.background.default} />
-
-            {/* Header with Logout */}
-            {/* <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
-                <View>
-                    <Text
-                        className="text-gray-800 font-medium"
-                        style={{ fontSize: getFontSize(isTablet ? 16 : 14) }}
-                    >
-                        Welcome back,
-                    </Text>
-                    <Text
-                        className="text-primary-600 font-semibold"
-                        style={{ fontSize: getFontSize(isTablet ? 18 : 16) }}
-                    >
-                        {user?.firstName} {user?.lastName}
-                    </Text>
-                </View>
-
-                <TouchableOpacity
-                    onPress={handleLogout}
-                    disabled={isLoading}
-                    className="flex-row items-center bg-primary-50 rounded-full px-4 py-2 active:opacity-80"
-                >
-                    <Feather
-                        name="log-out"
-                        size={isTablet ? 20 : 18}
-                        color={colors.primary.main}
-                    />
-                    <Text
-                        className="ml-2 text-primary-600 font-medium"
-                        style={{ fontSize: getFontSize(isTablet ? 15 : 13) }}
-                    >
-                        {isLoading ? "Logging out..." : "Logout"}
-                    </Text>
-                </TouchableOpacity>
-            </View> */}
-
             {renderSearchAndFilter()}
             {renderFilterModal()}
 
@@ -770,6 +762,8 @@ export default function Home() {
                     <PropertyCard
                         property={item}
                         onPress={handlePropertyPress}
+                        onWishlistToggle={handleWishlistToggle}
+                        isWishlisted={wishlistedProperties.includes(item._id)}
                     />
                 )}
                 keyExtractor={(item) => item._id}

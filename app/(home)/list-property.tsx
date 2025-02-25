@@ -29,8 +29,62 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Carousel from 'react-native-reanimated-carousel';
 import ListPropertyForm from "@/components/ListPropertyForm";
 import EditPropertyForm from "@/components/EditPropertyForm";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+const PropertyCardSkeleton = () => {
+    return (
+        <Animated.View
+            entering={FadeIn.duration(500)}
+            className="bg-white rounded-xl mb-4 shadow-sm overflow-hidden"
+        >
+            {/* Image Skeleton */}
+            <Animated.View className="h-[180px] w-full bg-gray-200" />
+
+            {/* Content Section Skeleton */}
+            <View className="p-4">
+                {/* Title and Price */}
+                <View className="mb-3">
+                    <Animated.View className="h-6 w-3/4 bg-gray-200 mb-2 rounded" />
+                    <Animated.View className="h-7 w-1/2 bg-gray-200 rounded" />
+                </View>
+
+                {/* Location */}
+                <View className="mb-4">
+                    <Animated.View className="h-5 w-4/5 bg-gray-200 rounded" />
+                </View>
+
+                {/* Property Features */}
+                <View className="flex-row justify-between pt-3 border-t border-gray-200">
+                    <View className="flex-1">
+                        <Animated.View className="h-4 w-16 bg-gray-200 mb-1 rounded" />
+                        <Animated.View className="h-5 w-20 bg-gray-200 rounded" />
+                    </View>
+                    <View className="flex-1">
+                        <Animated.View className="h-4 w-16 bg-gray-200 mb-1 rounded" />
+                        <Animated.View className="h-5 w-20 bg-gray-200 rounded" />
+                    </View>
+                    <View className="flex-1">
+                        <Animated.View className="h-4 w-16 bg-gray-200 mb-1 rounded" />
+                        <Animated.View className="h-5 w-20 bg-gray-200 rounded" />
+                    </View>
+                </View>
+            </View>
+        </Animated.View>
+    );
+};
+
+// Component to display multiple skeleton cards
+const SkeletonLoader = ({ count = 3 }) => {
+    return (
+        <>
+            {[...Array(count)].map((_, index) => (
+                <PropertyCardSkeleton key={`skeleton-${index}`} />
+            ))}
+        </>
+    );
+};
 
 const PropertyCard = ({ property, onEditPress }) => {
     const [activeSlide, setActiveSlide] = useState(0);
@@ -302,6 +356,10 @@ export default function ListProperty() {
         roomType: '',
         furnishing: ''
     });
+
+    useEffect(() => {
+        console.log("this is the user information first from the auth store in the list property form page:::: :::::::::", user)
+    }, [])
 
     // Debounce search text
     useEffect(() => {
@@ -860,17 +918,22 @@ export default function ListProperty() {
                     />
 
                     {userPropertyLoading && (
-                        <View style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            backgroundColor: 'rgba(255,255,255,0.7)',
-                        }}>
-                            <ActivityIndicator size="large" color={colors.primary.dark} />
+                        // <View style={{
+                        //     position: 'absolute',
+                        //     top: 0,
+                        //     left: 0,
+                        //     right: 0,
+                        //     bottom: 0,
+                        //     justifyContent: 'center',
+                        //     alignItems: 'center',
+                        //     backgroundColor: 'rgba(255,255,255,0.7)',
+                        // }}>
+                        //     <ActivityIndicator size="large" color={colors.primary.dark} />
+                        // </View>
+                        <View className="px-2 py-3">
+                            <ScrollView showsVerticalScrollIndicator={false}>
+                                <SkeletonLoader count={4} />
+                            </ScrollView>
                         </View>
                     )}
 

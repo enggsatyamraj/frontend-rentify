@@ -12,9 +12,9 @@ import {
     Image,
     Dimensions
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useAuthStore } from "@/store/auth.store";
 import colors from "@/utils/color";
 import { Feather, MaterialIcons, AntDesign, FontAwesome } from '@expo/vector-icons';
@@ -24,8 +24,63 @@ import Carousel from 'react-native-reanimated-carousel';
 import { propertyService } from "@/services/property.services";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from "@react-navigation/native";
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+// Skeleton for PropertyCard
+const PropertyCardSkeleton = () => {
+    return (
+        <Animated.View
+            entering={FadeIn.duration(500)}
+            className="bg-white rounded-xl mb-4 shadow-sm overflow-hidden"
+        >
+            {/* Image Skeleton */}
+            <Animated.View className="h-[180px] w-full bg-gray-200" />
+
+            {/* Content Section Skeleton */}
+            <View className="p-4">
+                {/* Title and Price */}
+                <View className="mb-3">
+                    <Animated.View className="h-6 w-3/4 bg-gray-200 mb-2 rounded" />
+                    <Animated.View className="h-7 w-1/2 bg-gray-200 rounded" />
+                </View>
+
+                {/* Location */}
+                <View className="mb-4">
+                    <Animated.View className="h-5 w-4/5 bg-gray-200 rounded" />
+                </View>
+
+                {/* Property Features */}
+                <View className="flex-row justify-between pt-3 border-t border-gray-200">
+                    <View className="flex-1">
+                        <Animated.View className="h-4 w-16 bg-gray-200 mb-1 rounded" />
+                        <Animated.View className="h-5 w-20 bg-gray-200 rounded" />
+                    </View>
+                    <View className="flex-1">
+                        <Animated.View className="h-4 w-16 bg-gray-200 mb-1 rounded" />
+                        <Animated.View className="h-5 w-20 bg-gray-200 rounded" />
+                    </View>
+                    <View className="flex-1">
+                        <Animated.View className="h-4 w-16 bg-gray-200 mb-1 rounded" />
+                        <Animated.View className="h-5 w-20 bg-gray-200 rounded" />
+                    </View>
+                </View>
+            </View>
+        </Animated.View>
+    );
+};
+
+// Component to display multiple skeleton cards
+const SkeletonLoader = ({ count = 3 }) => {
+    return (
+        <>
+            {[...Array(count)].map((_, index) => (
+                <PropertyCardSkeleton key={`skeleton-${index}`} />
+            ))}
+        </>
+    );
+};
 
 export const PropertyCard = ({ property, onPress, onWishlistToggle, isWishlisted }) => {
     const [activeSlide, setActiveSlide] = useState(0);
@@ -55,6 +110,67 @@ export const PropertyCard = ({ property, onPress, onWishlistToggle, isWishlisted
         </TouchableOpacity>
     );
 
+    const renderPropertyBadges = () => (
+        <View style={{
+            position: 'absolute',
+            top: 12,
+            left: 12,
+            zIndex: 2,
+            flexDirection: 'row',
+            gap: 6,
+        }}>
+            {property.status.isVerified && (
+                <View style={{
+                    backgroundColor: 'rgba(34, 197, 94, 0.9)',
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                    borderRadius: 4,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                }}>
+                    <MaterialIcons
+                        name="verified"
+                        size={14}
+                        color="#FFFFFF"
+                        style={{ marginRight: 3 }}
+                    />
+                    <Text style={{
+                        color: '#FFFFFF',
+                        fontSize: getFontSize(10),
+                        fontWeight: '600',
+                    }}>
+                        Verified
+                    </Text>
+                </View>
+            )}
+
+            {property.status.isFeatured && (
+                <View style={{
+                    backgroundColor: 'rgba(249, 168, 37, 0.9)',
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                    borderRadius: 4,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                }}>
+                    <MaterialIcons
+                        name="star"
+                        size={14}
+                        color="#FFFFFF"
+                        style={{ marginRight: 3 }}
+                    />
+                    <Text style={{
+                        color: '#FFFFFF',
+                        fontSize: getFontSize(10),
+                        fontWeight: '600',
+                    }}>
+                        Featured
+                    </Text>
+                </View>
+            )}
+        </View>
+    );
+
     const renderCarouselItem = ({ item }) => (
         <View style={{
             width: '100%',
@@ -62,6 +178,7 @@ export const PropertyCard = ({ property, onPress, onWishlistToggle, isWishlisted
             borderTopLeftRadius: 12,
             borderTopRightRadius: 12,
             overflow: 'hidden',
+            backgroundColor: colors.grey[200], // Background color as placeholder
         }}>
             <Image
                 source={{ uri: item }}
@@ -103,7 +220,8 @@ export const PropertyCard = ({ property, onPress, onWishlistToggle, isWishlisted
             }}>
             {/* Image Section */}
             <View style={{ height: 180, width: '100%', position: 'relative' }}>
-                {/* {renderWishlistButton()} */}
+                {renderWishlistButton()}
+                {renderPropertyBadges()}
                 <Carousel
                     width={SCREEN_WIDTH - 24}
                     height={180}
@@ -157,7 +275,7 @@ export const PropertyCard = ({ property, onPress, onWishlistToggle, isWishlisted
                 <View style={{
                     flexDirection: 'row',
                     alignItems: 'center',
-                    marginBottom: 16,
+                    marginBottom: 12,
                 }}>
                     <MaterialIcons
                         name="location-on"
@@ -170,6 +288,70 @@ export const PropertyCard = ({ property, onPress, onWishlistToggle, isWishlisted
                         color: colors.text.secondary,
                     }}>
                         {property.location.address}, {property.location.city}
+                    </Text>
+                </View>
+
+                {/* Metadata Stats */}
+                {property.metaData && (
+                    <View style={{
+                        flexDirection: 'row',
+                        marginBottom: 12,
+                    }}>
+                        <View style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginRight: 16,
+                        }}>
+                            <Feather
+                                name="eye"
+                                size={14}
+                                color={colors.text.secondary}
+                            />
+                            <Text style={{
+                                marginLeft: 4,
+                                fontSize: getFontSize(12),
+                                color: colors.text.secondary,
+                            }}>
+                                {property.metaData.views || 0} Views
+                            </Text>
+                        </View>
+                        {/* <View style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                        }}>
+                            <Feather
+                                name="heart"
+                                size={14}
+                                color={colors.text.secondary}
+                            />
+                            <Text style={{
+                                marginLeft: 4,
+                                fontSize: getFontSize(12),
+                                color: colors.text.secondary,
+                            }}>
+                                {property.metaData.favoriteCount || 0} Favorites
+                            </Text>
+                        </View> */}
+                    </View>
+                )}
+
+                {/* Available From */}
+                <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: 12,
+                }}>
+                    <Feather
+                        name="calendar"
+                        size={14}
+                        color={colors.text.secondary}
+                    />
+                    <Text style={{
+                        marginLeft: 4,
+                        fontSize: getFontSize(12),
+                        color: colors.text.secondary,
+                    }}>
+                        Available from: {new Date(property.availableFrom).toLocaleDateString()}
                     </Text>
                 </View>
 
@@ -264,7 +446,21 @@ export default function Home() {
     // Load wishlisted properties from AsyncStorage on mount
     useEffect(() => {
         loadWishlistedProperties();
+        showWishlistProperty();
     }, [isFocused]);
+
+    // useFocusEffect(
+    //     useCallback(() => {
+    //         loadWishlistedProperties();
+    //         showWishlistProperty();
+    //         return () => { };
+    //     }, [])
+    // )
+
+    const showWishlistProperty = async () => {
+        const wishlistProperty = await AsyncStorage.getItem('wishlistedProperties');
+        console.log("this is the wishlist property:::::::::", wishlistProperty);
+    }
 
     const loadWishlistedProperties = async () => {
         try {
@@ -779,11 +975,7 @@ export default function Home() {
                 onEndReached={handleLoadMore}
                 onEndReachedThreshold={0.5}
                 ListFooterComponent={() => (
-                    loading && (
-                        <View style={{ padding: 16 }}>
-                            <ActivityIndicator size="small" color={colors.primary.main} />
-                        </View>
-                    )
+                    loading && !refreshing && <SkeletonLoader count={3} />
                 )}
             />
         </SafeAreaView>

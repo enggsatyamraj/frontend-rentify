@@ -18,8 +18,269 @@ import { getFontSize } from '@/utils/font';
 import { MaterialIcons, Feather, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import Carousel from 'react-native-reanimated-carousel';
 import MapView, { Marker } from 'react-native-maps';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+// Skeleton components for property details
+const PropertyDetailsSkeleton = () => {
+    return (
+        <ScrollView showsVerticalScrollIndicator={false}>
+            {/* Image Carousel Skeleton */}
+            <Animated.View
+                entering={FadeIn.duration(500)}
+                style={{
+                    height: 250,
+                    width: '100%',
+                    backgroundColor: colors.grey[200],
+                }}
+            />
+
+            {/* Property Info Skeleton */}
+            <View style={{
+                padding: 16,
+                backgroundColor: colors.common.white,
+            }}>
+                <View style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    marginBottom: 8,
+                }}>
+                    <Animated.View
+                        entering={FadeIn.duration(500)}
+                        style={{
+                            height: 28,
+                            width: '70%',
+                            backgroundColor: colors.grey[200],
+                            borderRadius: 4,
+                        }}
+                    />
+                    <Animated.View
+                        entering={FadeIn.duration(500)}
+                        style={{
+                            height: 28,
+                            width: '20%',
+                            backgroundColor: colors.grey[200],
+                            borderRadius: 6,
+                        }}
+                    />
+                </View>
+
+                <Animated.View
+                    entering={FadeIn.duration(500)}
+                    style={{
+                        height: 28,
+                        width: '40%',
+                        backgroundColor: colors.grey[200],
+                        borderRadius: 4,
+                        marginBottom: 16,
+                    }}
+                />
+
+                <Animated.View
+                    entering={FadeIn.duration(500)}
+                    style={{
+                        height: 20,
+                        width: '100%',
+                        backgroundColor: colors.grey[200],
+                        borderRadius: 4,
+                        marginBottom: 16,
+                    }}
+                />
+
+                <Animated.View
+                    entering={FadeIn.duration(500)}
+                    style={{
+                        height: 40,
+                        width: '100%',
+                        backgroundColor: colors.grey[200],
+                        borderRadius: 4,
+                    }}
+                />
+            </View>
+
+            {/* Owner Info Skeleton */}
+            <View style={{
+                padding: 16,
+                backgroundColor: colors.common.white,
+                marginTop: 8,
+            }}>
+                <Animated.View
+                    entering={FadeIn.duration(500)}
+                    style={{
+                        height: 22,
+                        width: '60%',
+                        backgroundColor: colors.grey[200],
+                        borderRadius: 4,
+                        marginBottom: 16,
+                    }}
+                />
+
+                <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 16,
+                }}>
+                    <Animated.View
+                        entering={FadeIn.duration(500)}
+                        style={{
+                            height: 40,
+                            width: 40,
+                            borderRadius: 20,
+                            backgroundColor: colors.grey[200],
+                        }}
+                    />
+                    <Animated.View
+                        entering={FadeIn.duration(500)}
+                        style={{
+                            height: 20,
+                            width: '60%',
+                            backgroundColor: colors.grey[200],
+                            borderRadius: 4,
+                        }}
+                    />
+                </View>
+            </View>
+
+            {/* Description Skeleton */}
+            <View style={{
+                padding: 16,
+                backgroundColor: colors.common.white,
+                marginTop: 8,
+            }}>
+                <Animated.View
+                    entering={FadeIn.duration(500)}
+                    style={{
+                        height: 22,
+                        width: '40%',
+                        backgroundColor: colors.grey[200],
+                        borderRadius: 4,
+                        marginBottom: 8,
+                    }}
+                />
+
+                <Animated.View
+                    entering={FadeIn.duration(500)}
+                    style={{
+                        height: 80,
+                        width: '100%',
+                        backgroundColor: colors.grey[200],
+                        borderRadius: 4,
+                    }}
+                />
+            </View>
+
+            {/* Property Details Skeleton */}
+            <View style={{
+                padding: 16,
+                backgroundColor: colors.common.white,
+                marginTop: 8,
+            }}>
+                <Animated.View
+                    entering={FadeIn.duration(500)}
+                    style={{
+                        height: 22,
+                        width: '50%',
+                        backgroundColor: colors.grey[200],
+                        borderRadius: 4,
+                        marginBottom: 16,
+                    }}
+                />
+
+                {[...Array(8)].map((_, index) => (
+                    <Animated.View
+                        key={`details-row-${index}`}
+                        entering={FadeIn.delay(100 * index).duration(500)}
+                        style={{
+                            height: 20,
+                            width: '100%',
+                            backgroundColor: colors.grey[200],
+                            borderRadius: 4,
+                            marginBottom: 12,
+                        }}
+                    />
+                ))}
+            </View>
+
+            {/* Amenities Skeleton */}
+            <View style={{
+                padding: 16,
+                backgroundColor: colors.common.white,
+                marginTop: 8,
+            }}>
+                <Animated.View
+                    entering={FadeIn.duration(500)}
+                    style={{
+                        height: 22,
+                        width: '40%',
+                        backgroundColor: colors.grey[200],
+                        borderRadius: 4,
+                        marginBottom: 12,
+                    }}
+                />
+
+                <View style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    gap: 8,
+                }}>
+                    {[...Array(6)].map((_, index) => (
+                        <Animated.View
+                            key={`amenity-${index}`}
+                            entering={FadeIn.delay(50 * index).duration(500)}
+                            style={{
+                                height: 32,
+                                width: 80,
+                                backgroundColor: colors.grey[200],
+                                borderRadius: 16,
+                            }}
+                        />
+                    ))}
+                </View>
+            </View>
+
+            {/* Location Skeleton */}
+            <View style={{
+                padding: 16,
+                backgroundColor: colors.common.white,
+                marginTop: 8,
+                marginBottom: 16,
+            }}>
+                <Animated.View
+                    entering={FadeIn.duration(500)}
+                    style={{
+                        height: 22,
+                        width: '40%',
+                        backgroundColor: colors.grey[200],
+                        borderRadius: 4,
+                        marginBottom: 12,
+                    }}
+                />
+
+                <Animated.View
+                    entering={FadeIn.duration(500)}
+                    style={{
+                        height: 200,
+                        width: '100%',
+                        backgroundColor: colors.grey[200],
+                        borderRadius: 12,
+                        marginBottom: 12,
+                    }}
+                />
+
+                <Animated.View
+                    entering={FadeIn.duration(500)}
+                    style={{
+                        height: 48,
+                        width: '100%',
+                        backgroundColor: colors.grey[200],
+                        borderRadius: 8,
+                    }}
+                />
+            </View>
+        </ScrollView>
+    );
+};
 
 const InfoRow = ({ label, value }) => (
     <View style={{
@@ -165,6 +426,7 @@ export default function PropertyDetails() {
                             width: '100%',
                             height: '100%',
                             position: 'relative',
+                            backgroundColor: colors.grey[200], // Background color while loading
                         }}>
                             <Image
                                 source={{ uri: item }}
@@ -632,25 +894,13 @@ export default function PropertyDetails() {
         </View>
     );
 
-    if (loading) {
-        return (
-            <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.default }}>
-                {renderHeader()}
-                <View style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                }}>
-                    <ActivityIndicator size="large" color={colors.primary.main} />
-                </View>
-            </SafeAreaView>
-        );
-    }
+    return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.default }}>
+            {renderHeader()}
 
-    if (!property) {
-        return (
-            <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.default }}>
-                {renderHeader()}
+            {loading ? (
+                <PropertyDetailsSkeleton />
+            ) : !property ? (
                 <View style={{
                     flex: 1,
                     justifyContent: 'center',
@@ -664,25 +914,20 @@ export default function PropertyDetails() {
                         Property not found
                     </Text>
                 </View>
-            </SafeAreaView>
-        );
-    }
-
-    return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.default }}>
-            {renderHeader()}
-            <ScrollView showsVerticalScrollIndicator={false}>
-                {renderCarousel()}
-                {renderPropertyInfo()}
-                {renderOwnerInfo()}
-                {renderDescription()}
-                {renderDetails()}
-                {renderMaintenance()}
-                {renderAmenities()}
-                {renderPreferredTenants()}
-                {renderRules()}
-                {renderLocation()}
-            </ScrollView>
+            ) : (
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    {renderCarousel()}
+                    {renderPropertyInfo()}
+                    {renderOwnerInfo()}
+                    {renderDescription()}
+                    {renderDetails()}
+                    {renderMaintenance()}
+                    {renderAmenities()}
+                    {renderPreferredTenants()}
+                    {renderRules()}
+                    {renderLocation()}
+                </ScrollView>
+            )}
         </SafeAreaView>
     );
 }

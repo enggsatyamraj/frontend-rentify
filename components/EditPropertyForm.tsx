@@ -574,7 +574,7 @@ export default function EditPropertyForm({ closeEditPropertyActionSheet, propert
                 <View className='mb-3'>
                     <Text className='mb-1'>Bill Type</Text>
                     <View className='flex-row gap-2'>
-                        {['daily', 'monthly'].map((type) => (
+                        {['monthly'].map((type) => (
                             <TouchableOpacity
                                 key={type}
                                 className={`px-4 py-2 rounded-full`}

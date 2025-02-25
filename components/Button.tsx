@@ -39,7 +39,8 @@ export const Button = ({
                 backgroundColor: getBackgroundColor(),
                 paddingVertical: isTablet ? 18 : 14,
                 borderWidth: variant === 'secondary' ? 1 : 0,
-                borderColor: colors.primary.main
+                borderColor: colors.primary.main,
+                paddingHorizontal: 10
             }}
             activeOpacity={0.8}
         >

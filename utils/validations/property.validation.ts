@@ -16,7 +16,7 @@ const priceSchema = z.object({
         invalid_type_error: "Base price must be a number"
     }).min(1, "Base price must be greater than 0"),
 
-    billType: z.enum(['daily', 'monthly'], {
+    billType: z.enum(['monthly'], {
         required_error: "Bill type is required",
         invalid_type_error: "Invalid bill type"
     }),
